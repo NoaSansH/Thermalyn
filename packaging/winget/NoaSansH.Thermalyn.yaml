@@ -1,0 +1,7 @@
+# Submitted to https://github.com/microsoft/winget-pkgs as
+# manifests/n/NoaSansH/Thermalyn/1.0.0/
+PackageIdentifier: NoaSansH.Thermalyn
+PackageVersion: 1.0.0
+DefaultLocale: en-US
+ManifestType: version
+ManifestVersion: 1.6.0
