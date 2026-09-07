@@ -1,0 +1,21 @@
+# Security advisories are handled by GitHub independently of this file. What is configured here is
+# the routine version bumps, kept monthly so the repository is not permanently carrying open pull
+# requests and extra branches for a project maintained by one person.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      dependencies:
+        patterns: ['*']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      actions:
+        patterns: ['*']

@@ -1,0 +1,397 @@
+<Window x:Class="Thermalyn.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:Thermalyn.Controls"
+        Title="Thermalyn" Width="1200" Height="820" MinWidth="320" MinHeight="480"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="{DynamicResource CanvasBrush}" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="RootLayout" Background="{DynamicResource CanvasBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="34"/>
+            <RowDefinition x:Name="TopNavigationRow" Height="47"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition x:Name="BottomNavigationRow" Height="0"/>
+        </Grid.RowDefinitions>
+
+        <!-- Native-behaving custom title bar. -->
+        <Border x:Name="TitleBar" Grid.Row="0" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                    <Grid Width="14" Height="14" VerticalAlignment="Center"><Rectangle Fill="{DynamicResource AccentBrush}"><Rectangle.OpacityMask><ImageBrush ImageSource="Assets/LogoOuter.png" Stretch="Uniform"/></Rectangle.OpacityMask></Rectangle><Rectangle Fill="{DynamicResource AccentDeepBrush}"><Rectangle.OpacityMask><ImageBrush ImageSource="Assets/LogoInner.png" Stretch="Uniform"/></Rectangle.OpacityMask></Rectangle></Grid>
+                    <TextBlock Text="Thermalyn" FontSize="11.5" Foreground="{DynamicResource IconBrush}" Margin="8,0,0,0"/>
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button x:Name="MinimizeCaptionButton" Style="{StaticResource CaptionButton}" Click="MinimizeWindow_Click"><Border Width="10" Height="1" Background="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                    <Button x:Name="MaximizeCaptionButton" Style="{StaticResource CaptionButton}" Click="MaximizeWindow_Click"><Grid Width="10" Height="10"><Border x:Name="MaximizeGlyph" BorderBrush="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" BorderThickness="1" CornerRadius="1"/><Path x:Name="RestoreGlyph" Visibility="Collapsed" Data="M3,1 H10 V8 M1,3 H8 V10 H1 Z" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1"/></Grid></Button>
+                    <Button x:Name="CloseCaptionButton" Style="{StaticResource CloseCaptionButton}" Click="CloseWindow_Click"><controls:Icon Data="{StaticResource IconX}" Width="18" Height="18" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.1"/></Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Top navigation. It becomes a bottom icon bar on very narrow windows. -->
+        <Border x:Name="NavigationBar" Grid.Row="1" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="32,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="CompactButton" Content="{DynamicResource Nav.Compact}" Style="{StaticResource NavButton}" Click="Compact_Click"/>
+                    <Button x:Name="BalancedButton" Content="{DynamicResource Nav.Balanced}" Style="{StaticResource NavButton}" Click="Balanced_Click"/>
+                    <Button x:Name="DetailedButton" Content="{DynamicResource Nav.Detailed}" Style="{StaticResource NavButton}" Click="Detailed_Click"/>
+                </StackPanel>
+                <Button HorizontalAlignment="Right" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}">
+                    <controls:Icon Data="{StaticResource IconSettings}" Width="15" Height="15" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border x:Name="HardwareDriverBanner" Grid.Row="2" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="32,12">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,18,0">
+                    <StackPanel Orientation="Horizontal">
+                        <controls:Icon Data="{StaticResource IconCpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="HardwareDriverTitle" Text="{DynamicResource Driver.TitleGeneric}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="9,0,0,0"/>
+                    </StackPanel>
+                    <TextBlock x:Name="HardwareDriverMessage" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="23,3,0,0"/>
+                    <TextBlock x:Name="HardwareDriverHint" Text="{DynamicResource Driver.Hint}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="23,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="{DynamicResource Driver.Later}" Style="{StaticResource PillButton}" Height="36" Margin="0,0,8,0" Click="DismissHardwareDriver_Click"/>
+                    <Button x:Name="InstallHardwareDriverButton" Content="{DynamicResource Driver.Install}" Style="{StaticResource PrimaryButton}" Click="InstallHardwareDriver_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="3" x:Name="ContentHost">
+            <!-- Balanced view: two framed component blocks, a framed measurement strip, a framed system list. -->
+            <ScrollViewer x:Name="BalancedView" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Padding="32,28">
+                <Grid x:Name="BalancedAdaptiveGrid" HorizontalAlignment="Stretch" MaxWidth="1680">
+                    <Grid.ColumnDefinitions><ColumnDefinition x:Name="BalancedPrimaryColumn" Width="*"/><ColumnDefinition x:Name="BalancedSecondaryColumn" Width="0"/></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition x:Name="BalancedSecondaryRow" Height="Auto"/></Grid.RowDefinitions>
+                    <StackPanel x:Name="BalancedPrimary">
+                        <TextBlock x:Name="StatusText" Text="{DynamicResource Status.Initialising}" Style="{StaticResource MetaText}" Margin="2,0,0,14"/>
+                        <UniformGrid x:Name="HeroGrid" Columns="2" Margin="-8,0">
+                            <controls:ComponentCard x:Name="CpuHeroCard" Heading="{DynamicResource Head.Processor}" IconData="{StaticResource IconCpu}" Margin="8,0" MouseLeftButtonUp="CpuCard_Click"/>
+                            <controls:ComponentCard x:Name="GpuHeroCard" Heading="{Binding GpuHeading}" IconData="{StaticResource IconGpu}" Margin="8,0" MouseLeftButtonUp="GpuCard_Click"/>
+                        </UniformGrid>
+
+                        <TextBlock x:Name="ActiveGpuNote" Text="{DynamicResource Status.ActiveGpuNote}" Style="{StaticResource MetaText}" Margin="2,10,0,0" TextWrapping="Wrap"/>
+
+                        <TextBlock Text="{DynamicResource Head.Measures}" Style="{StaticResource SectionTitle}"/>
+                        <Border x:Name="SecondaryMetricsCard" Style="{StaticResource Card}" Padding="18,15">
+                            <UniformGrid x:Name="SecondaryMetrics" Columns="4">
+                                <StackPanel x:Name="CpuClockMetric" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Metric.CpuFrequency}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="CpuClock" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                <StackPanel x:Name="CpuPowerMetric" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Metric.CpuPower}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="CpuPower" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                <StackPanel x:Name="GpuPowerMetric" Margin="0,0,16,0"><TextBlock Text="{DynamicResource Metric.GpuPower}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="GpuPower" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                <StackPanel x:Name="RamLoadMetric"><TextBlock Text="{DynamicResource Common.Ram}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="BalancedRamMetric" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                            </UniformGrid>
+                        </Border>
+                    </StackPanel>
+
+                    <StackPanel x:Name="BalancedSecondary" Grid.Row="1">
+                        <TextBlock x:Name="SystemSectionTitle" Text="{DynamicResource Head.System}" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource ListCard}">
+                            <StackPanel x:Name="BalancedSystemList">
+                                <StackPanel x:Name="BalancedGpuPanel"/>
+                                <Border x:Name="RamSystemRow" Tag="Row" Style="{StaticResource Row}" Cursor="Hand" MouseLeftButtonUp="RamCard_Click">
+                                    <Grid x:Name="RamSystemGrid"><Grid.ColumnDefinitions><ColumnDefinition x:Name="RamLabelColumn" Width="260"/><ColumnDefinition/><ColumnDefinition x:Name="RamValueColumn" Width="78"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition/><RowDefinition x:Name="RamNarrowRow" Height="0"/></Grid.RowDefinitions>
+                                        <StackPanel x:Name="RamSystemLabel" Orientation="Horizontal"><controls:Icon Data="{StaticResource IconMemory}" Width="15" Height="15" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Common.Ram}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="10,0,0,0"/><TextBlock x:Name="RamValue" Text="—" Style="{StaticResource MetaText}" Margin="7,1,0,0" VerticalAlignment="Center"/></StackPanel>
+                                        <Border x:Name="RamBarHost" Grid.Column="1" Width="220" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0"><ProgressBar x:Name="RamBar" Maximum="100"/></Border>
+                                        <TextBlock x:Name="RamPercentValue" Grid.Column="2" HorizontalAlignment="Right" FontSize="14" Style="{StaticResource MonoValue}"/>
+                                    </Grid>
+                                </Border>
+                                <StackPanel x:Name="StoragePanel"/>
+                                <StackPanel x:Name="FanSection">
+                                    <Border x:Name="FanRow" Tag="Row" Style="{StaticResource Row}"><Grid><Grid.ColumnDefinitions><ColumnDefinition x:Name="FanLabelColumn" Width="260"/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconFan}" Width="15" Height="15" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Common.Fans}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="10,0,0,0"/></StackPanel><StackPanel x:Name="FanPanel" Grid.Column="1" VerticalAlignment="Center"><TextBlock Text="{DynamicResource Common.Searching}" Style="{StaticResource MetaText}"/></StackPanel></Grid></Border>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Compact view: two temperatures and memory, nothing else. Sized for a narrow window parked in a corner. -->
+            <ScrollViewer x:Name="CompactView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Padding="32,28">
+                <StackPanel HorizontalAlignment="Stretch" MaxWidth="900">
+                    <TextBlock x:Name="CompactStatusText" Text="{DynamicResource Status.ReadingSensors}" Style="{StaticResource MetaText}" Margin="2,0,0,14"/>
+                    <UniformGrid x:Name="CompactCardsGrid" Columns="2" Margin="-8,0">
+                        <Border Style="{StaticResource Card}" Margin="8,0" Cursor="Hand" MouseLeftButtonUp="CpuCard_Click">
+                            <StackPanel>
+                                <Grid x:Name="CompactCpuStateHeader" Margin="0,0,0,8"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconCpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Head.Processor}" Style="{StaticResource SectionTitle}" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel x:Name="CompactCpuStateBadge" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"><Ellipse Width="7" Height="7" Fill="{Binding Foreground,ElementName=CompactCpuTemp}" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock x:Name="CompactCpuState" Text="{DynamicResource Common.Normal}" Style="{StaticResource MetaText}" TextTrimming="CharacterEllipsis"/></StackPanel>
+                                </Grid>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                        <TextBlock x:Name="CompactCpuTemp" Text="—" FontSize="44" LineHeight="48" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TempNormalBrush}"/>
+                                        <TextBlock x:Name="CompactCpuUnit" Text="°C" FontSize="18" FontWeight="Medium" Foreground="{Binding Foreground,ElementName=CompactCpuTemp}" Margin="4,0,0,7" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,7"><TextBlock x:Name="CompactCpuSecondaryLabel" Text="{DynamicResource Common.Load}" Style="{StaticResource FieldLabel}" TextAlignment="Right"/><TextBlock x:Name="CompactCpuStats" Text="—" FontSize="15" Style="{StaticResource MonoValue}" TextAlignment="Right"/></StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource Card}" Margin="8,0" Cursor="Hand" MouseLeftButtonUp="GpuCard_Click">
+                            <StackPanel>
+                                <Grid x:Name="CompactGpuStateHeader" Margin="0,0,0,8"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconGpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/><TextBlock x:Name="CompactGpuTitle" Text="{DynamicResource Head.GraphicsCard}" Style="{StaticResource SectionTitle}" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel>
+                                    <StackPanel x:Name="CompactGpuStateBadge" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"><Ellipse Width="7" Height="7" Fill="{Binding Foreground,ElementName=CompactGpuTemp}" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock x:Name="CompactGpuState" Text="{DynamicResource Common.Normal}" Style="{StaticResource MetaText}" TextTrimming="CharacterEllipsis"/></StackPanel>
+                                </Grid>
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                        <TextBlock x:Name="CompactGpuTemp" Text="—" FontSize="44" LineHeight="48" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TempNormalBrush}"/>
+                                        <TextBlock x:Name="CompactGpuUnit" Text="°C" FontSize="18" FontWeight="Medium" Foreground="{Binding Foreground,ElementName=CompactGpuTemp}" Margin="4,0,0,7" VerticalAlignment="Bottom"/>
+                                    </StackPanel>
+                                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,7"><TextBlock x:Name="CompactGpuSecondaryLabel" Text="{DynamicResource Common.Load}" Style="{StaticResource FieldLabel}" TextAlignment="Right"/><TextBlock x:Name="CompactGpuStats" Text="—" FontSize="15" Style="{StaticResource MonoValue}" TextAlignment="Right"/></StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <Border Style="{StaticResource ListCard}" Margin="0,14,0,0">
+                        <StackPanel x:Name="CompactSystemList">
+                            <Border x:Name="CompactRamRow" Tag="Row" Style="{StaticResource Row}" Cursor="Hand" MouseLeftButtonUp="RamCard_Click">
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition x:Name="CompactRamLabelColumn" Width="260"/><ColumnDefinition/><ColumnDefinition Width="78"/></Grid.ColumnDefinitions>
+                                    <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconMemory}" Width="15" Height="15" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Common.Ram}" Foreground="{DynamicResource TextSecondaryBrush}" Margin="10,0,0,0"/><TextBlock x:Name="CompactRamValue" Text="—" Style="{StaticResource MetaText}" Margin="7,1,0,0" VerticalAlignment="Center"/></StackPanel>
+                                    <Border Grid.Column="1" Width="220" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="18,0"><ProgressBar x:Name="CompactRamBar" Maximum="100"/></Border>
+                                    <TextBlock x:Name="CompactRam" Grid.Column="2" Text="—" HorizontalAlignment="Right" FontSize="14" Style="{StaticResource MonoValue}"/>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Detailed view: the same frames, but every component carries its own numbers, extremes and sensors. -->
+            <ScrollViewer x:Name="DetailedView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Padding="32,28"><StackPanel HorizontalAlignment="Stretch" MaxWidth="1680">
+                <TextBlock x:Name="DetailedStatusText" Text="{DynamicResource Status.FirstRead}" Style="{StaticResource MetaText}" Margin="2,0,0,14"/>
+                <UniformGrid x:Name="DetailedChartGrid" Columns="2" Margin="-8,0">
+                    <Border Style="{StaticResource Card}" Margin="8,0" Cursor="Hand" MouseLeftButtonUp="CpuCard_Click">
+                        <StackPanel>
+                            <Grid x:Name="DetailedCpuStateHeader" Margin="0,0,0,10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconCpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Head.Processor}" Style="{StaticResource SectionTitle}" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel>
+                                <StackPanel x:Name="DetailedCpuStateBadge" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"><Ellipse Width="7" Height="7" Fill="{Binding Foreground,ElementName=DetailedCpuValue}" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock x:Name="DetailedCpuState" Text="{DynamicResource Common.Normal}" Style="{StaticResource MetaText}" TextTrimming="CharacterEllipsis"/></StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="DetailedCpuName" Text="{DynamicResource Common.Detecting}" Style="{StaticResource ComponentTitle}"/>
+                            <Grid Margin="0,6,0,10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                    <TextBlock x:Name="DetailedCpuValue" Text="—" FontSize="44" LineHeight="48" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TempNormalBrush}"/>
+                                    <TextBlock x:Name="DetailedCpuUnit" Text="°C" FontSize="18" FontWeight="Medium" Foreground="{Binding Foreground,ElementName=DetailedCpuValue}" Margin="4,0,0,7" VerticalAlignment="Bottom"/>
+                                </StackPanel>
+                                <StackPanel x:Name="DetailedCpuRangeHost" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,7"><TextBlock Text="{DynamicResource Metric.Range}" Style="{StaticResource FieldLabel}" TextAlignment="Right"/><TextBlock x:Name="DetailedCpuRange" Text="—" FontSize="14" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}" TextAlignment="Right"/></StackPanel>
+                            </Grid>
+                            <controls:HistoryChart x:Name="DetailedCpuHistory" Height="146" Label="{DynamicResource Chart.CpuLabel}" Stroke="{DynamicResource AccentBrush}"/>
+                            <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Margin="0,14,0,0" Padding="0,13,0,0">
+                                <UniformGrid x:Name="DetailedCpuMetrics" Columns="4">
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Load}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedCpuLoad" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Frequency}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedCpuClock" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Power}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedCpuPower" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel x:Name="DetailedCpuFanMetric"><TextBlock Text="{DynamicResource Common.Fan}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedCpuFan" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Card}" Margin="8,0" Cursor="Hand" MouseLeftButtonUp="GpuCard_Click">
+                        <StackPanel>
+                            <Grid x:Name="DetailedGpuStateHeader" Margin="0,0,0,10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconGpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/><TextBlock x:Name="DetailedGpuHeading" Text="{DynamicResource Head.GraphicsCard}" Style="{StaticResource SectionTitle}" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel>
+                                <StackPanel x:Name="DetailedGpuStateBadge" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center"><Ellipse Width="7" Height="7" Fill="{Binding Foreground,ElementName=DetailedGpuValue}" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock x:Name="DetailedGpuState" Text="{DynamicResource Common.Normal}" Style="{StaticResource MetaText}" TextTrimming="CharacterEllipsis"/></StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="DetailedGpuName" Text="{DynamicResource Common.Detecting}" Style="{StaticResource ComponentTitle}"/>
+                            <Grid Margin="0,6,0,10"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                    <TextBlock x:Name="DetailedGpuValue" Text="—" FontSize="44" LineHeight="48" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TempNormalBrush}"/>
+                                    <TextBlock x:Name="DetailedGpuUnit" Text="°C" FontSize="18" FontWeight="Medium" Foreground="{Binding Foreground,ElementName=DetailedGpuValue}" Margin="4,0,0,7" VerticalAlignment="Bottom"/>
+                                </StackPanel>
+                                <StackPanel x:Name="DetailedGpuRangeHost" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,7"><TextBlock Text="{DynamicResource Metric.Range}" Style="{StaticResource FieldLabel}" TextAlignment="Right"/><TextBlock x:Name="DetailedGpuRange" Text="—" FontSize="14" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}" TextAlignment="Right"/></StackPanel>
+                            </Grid>
+                            <controls:HistoryChart x:Name="DetailedGpuHistory" Height="146" Label="{DynamicResource Chart.GpuLabel}" Stroke="{DynamicResource AccentBrush}"/>
+                            <Border BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Margin="0,14,0,0" Padding="0,13,0,0">
+                                <UniformGrid x:Name="DetailedGpuMetrics" Columns="4">
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Load}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedGpuLoad" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Power}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedGpuPower" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel x:Name="DetailedGpuFanMetric"><TextBlock Text="{DynamicResource Common.Fan}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedGpuFan" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                    <StackPanel><TextBlock Text="{DynamicResource Common.Type}" Style="{StaticResource FieldLabel}"/><TextBlock x:Name="DetailedGpuKind" Text="—" FontSize="15" Style="{StaticResource MonoValue}" Foreground="{DynamicResource TextSecondaryBrush}"/></StackPanel>
+                                </UniformGrid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <TextBlock Text="{DynamicResource Head.Memory}" Style="{StaticResource SectionTitle}"/>
+                <Border x:Name="DetailedRamCard" Style="{StaticResource Card}" Cursor="Hand" MouseLeftButtonUp="RamCard_Click">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconMemory}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8" VerticalAlignment="Center"/><TextBlock x:Name="DetailedRamName" Text="{DynamicResource Common.Ram}" Style="{StaticResource ComponentTitle}" Margin="9,0,0,0" VerticalAlignment="Center"/></StackPanel>
+                            <TextBlock x:Name="DetailedRamSummary" Text="—" Style="{StaticResource MetaText}" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Grid Margin="0,0,0,8">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom">
+                                <TextBlock x:Name="DetailedRamPercent" Text="—" FontSize="44" LineHeight="48" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Foreground="{DynamicResource AccentBrush}"/>
+                                <TextBlock Text="%" FontSize="18" FontWeight="Medium" Foreground="{DynamicResource AccentBrush}" Margin="4,0,0,7" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                            <StackPanel x:Name="DetailedRamBarHost" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,9" Width="260"><TextBlock Text="{DynamicResource Common.Occupancy}" Style="{StaticResource FieldLabel}" TextAlignment="Right"/><ProgressBar x:Name="DetailedRamBar" Maximum="100" Margin="0,5,0,0"/></StackPanel>
+                        </Grid>
+                        <controls:HistoryChart x:Name="DetailedRamHistory" Height="156" Label="{DynamicResource Chart.RamLabel}" IsTemperature="False" Stroke="{DynamicResource AccentBrush}"/>
+                    </StackPanel>
+                </Border>
+
+                <UniformGrid x:Name="DetailedHardwareGrid" Columns="2" Margin="-8,0">
+                    <StackPanel Margin="8,0"><TextBlock Text="{DynamicResource Head.GraphicsComponents}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="DetailedGpuPanel"/></Border></StackPanel>
+                    <StackPanel Margin="8,0"><TextBlock Text="{DynamicResource Head.StorageAndCooling}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="DetailedSystemPanel"/></Border></StackPanel>
+                </UniformGrid>
+
+                <UniformGrid x:Name="DetailedSensorGrid" Columns="2" Margin="-8,0">
+                    <StackPanel Margin="8,0"><TextBlock Text="{DynamicResource Head.SensorsProcessor}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="DetailedCpuSensorsPanel"/></Border></StackPanel>
+                    <StackPanel Margin="8,0"><TextBlock x:Name="DetailedGpuSensorsTitle" Text="{DynamicResource Head.SensorsGraphicsCard}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="DetailedGpuSensorsPanel"/></Border></StackPanel>
+                </UniformGrid>
+
+                <Grid>
+                    <TextBlock Text="{DynamicResource Head.Exceedances}" Style="{StaticResource SectionTitle}"/>
+                    <Button x:Name="ClearEventsButton" Content="{DynamicResource Settings.Clear}" Style="{StaticResource PillButton}" Height="26" FontSize="11" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,0,6" Click="ClearEvents_Click"/>
+                </Grid>
+                <Border Style="{StaticResource ListCard}"><StackPanel x:Name="ThermalEventsPanel"/></Border>
+
+                <TextBlock Text="{DynamicResource Head.TopApplications}" Style="{StaticResource SectionTitle}"/>
+                <UniformGrid x:Name="ProcessGrid" Columns="3" Margin="-8,0">
+                    <StackPanel Margin="8,0,8,16"><TextBlock Text="{DynamicResource Common.Processor}" Style="{StaticResource ComponentTitle}" Margin="0,0,0,8"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="CpuProcessesPanel"/></Border></StackPanel>
+                    <StackPanel Margin="8,0,8,16"><TextBlock Text="{DynamicResource Common.Memory}" Style="{StaticResource ComponentTitle}" Margin="0,0,0,8"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="RamProcessesPanel"/></Border></StackPanel>
+                    <StackPanel Margin="8,0,8,16"><TextBlock Text="{DynamicResource Common.GraphicsCard}" Style="{StaticResource ComponentTitle}" Margin="0,0,0,8"/><Border Style="{StaticResource ListCard}"><StackPanel x:Name="GpuProcessesPanel"/></Border></StackPanel>
+                </UniformGrid>
+            </StackPanel></ScrollViewer>
+
+            <!-- Detail page always uses the complete content area. -->
+            <Border x:Name="DetailsView" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0" Padding="32,28" HorizontalAlignment="Stretch">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <Grid MaxWidth="1120" HorizontalAlignment="Stretch"><Button Style="{StaticResource IconButton}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-9,-6,0,0" Click="CloseDetails_Click"><controls:Icon Data="{StaticResource IconArrowLeft}" Width="16" Height="16" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button><StackPanel Margin="38,0,0,18"><TextBlock x:Name="DetailKind" Style="{StaticResource PageTitle}"/><TextBlock x:Name="DetailName" Style="{StaticResource ComponentTitle}" Margin="0,2,0,0"/></StackPanel></Grid>
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch"><StackPanel x:Name="DetailContent" MaxWidth="1120" HorizontalAlignment="Stretch">
+                        <Grid x:Name="DetailOverviewGrid"><Grid.ColumnDefinitions><ColumnDefinition x:Name="DetailOverviewPrimaryColumn"/><ColumnDefinition x:Name="DetailOverviewSecondaryColumn" Width="0"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <Border x:Name="DetailChartCard" Background="Transparent" Padding="0"><StackPanel>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBlock x:Name="DetailChartLabel" Text="{DynamicResource Common.History}" Style="{StaticResource ComponentTitle}" VerticalAlignment="Bottom"/><TextBlock x:Name="DetailChartCurrent" Grid.Column="1" FontSize="26" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Margin="20,0,0,0"/></Grid>
+                                <controls:HistoryChart x:Name="DetailChartHistory" Margin="0,10,0,0" Height="206" Stroke="{DynamicResource AccentBrush}"/>
+                            </StackPanel></Border>
+                            <UniformGrid x:Name="DetailSummaryGrid" Grid.Row="1" Columns="5" Margin="0,10,0,0"/>
+                        </Grid>
+                        <StackPanel x:Name="DetailSensors"/>
+                    </StackPanel></ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Settings: restrained rows, fixed reading width, responsive wrapping. -->
+            <Border x:Name="SettingsView" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" Padding="32,28" MaxWidth="640" HorizontalAlignment="Center">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <Grid><Button Style="{StaticResource IconButton}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-9,-6,0,0" Click="CloseSettings_Click"><controls:Icon Data="{StaticResource IconArrowLeft}" Width="16" Height="16" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button><StackPanel Margin="38,0,0,10"><TextBlock Text="{DynamicResource Nav.Settings}" Style="{StaticResource PageTitle}"/><TextBlock Text="{DynamicResource Settings.Subtitle}" Style="{StaticResource MetaText}" Margin="0,2,0,0"/></StackPanel></Grid>
+                    <ScrollViewer x:Name="SettingsScroll" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch"><StackPanel Margin="0,0,8,18">
+                        <TextBlock Text="{DynamicResource Head.Appearance}" Style="{StaticResource SectionTitle}" Margin="0,14,0,12"/>
+                        <Border Style="{StaticResource Card}"><StackPanel>
+                            <TextBlock Text="{DynamicResource Settings.Language}" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/><WrapPanel Margin="0,0,0,16"><RadioButton x:Name="EnglishRadio" Content="English" GroupName="Language" Margin="0,0,24,8"/><RadioButton x:Name="FrenchRadio" Content="Français" GroupName="Language" Margin="0,0,0,8"/></WrapPanel><TextBlock Text="{DynamicResource Settings.Theme}" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/><WrapPanel Margin="0,0,0,16"><RadioButton x:Name="DarkThemeRadio" Content="{DynamicResource Settings.ThemeDark}" GroupName="Theme" Margin="0,0,24,8" Checked="ThemeRadio_Checked"/><RadioButton x:Name="LightThemeRadio" Content="{DynamicResource Settings.ThemeLight}" GroupName="Theme" Margin="0,0,0,8" Checked="ThemeRadio_Checked"/></WrapPanel>
+                            <TextBlock Text="{DynamicResource Settings.DarkPalettes}" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
+                            <WrapPanel Margin="0,0,0,14">
+                                <Button Tag="Studio" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#3B9EFF" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Studio}"/></StackPanel></Button>
+                                <Button Tag="Ardoise" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#8FB4D9" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Slate}"/></StackPanel></Button>
+                                <Button Tag="Prisme" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#A97BFF" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Prism}"/></StackPanel></Button>
+                                <Button Tag="Menthe" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#35CFB4" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Mint}"/></StackPanel></Button>
+                                <Button Tag="Cuivre" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#FF9A4D" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Copper}"/></StackPanel></Button>
+                            </WrapPanel>
+                            <TextBlock Text="{DynamicResource Settings.LightPalettes}" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/>
+                            <WrapPanel Margin="0,0,0,14">
+                                <Button Tag="Aube" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#1F6FB5" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Dawn}"/></StackPanel></Button>
+                                <Button Tag="Sauge" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#2E7D5B" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Sage}"/></StackPanel></Button>
+                                <Button Tag="Sable" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#A0662A" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Sand}"/></StackPanel></Button>
+                                <Button Tag="Encre" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#2C4C73" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Ink}"/></StackPanel></Button>
+                                <Button Tag="Grenat" Style="{StaticResource PillButton}" Margin="0,0,8,8" Click="PalettePreset_Click"><StackPanel Orientation="Horizontal"><Ellipse Width="9" Height="9" Fill="#A62F44" Margin="0,0,7,0" VerticalAlignment="Center"/><TextBlock Text="{DynamicResource Palette.Garnet}"/></StackPanel></Button>
+                            </WrapPanel>
+                            <TextBlock Text="{DynamicResource Settings.Colours}" Style="{StaticResource FieldLabel}" Margin="0,0,0,2"/>
+                            <StackPanel>
+                                <Border Background="Transparent" Tag="Accent" Style="{StaticResource FlatCard}" Cursor="Hand" MouseLeftButtonUp="OpenColorPicker_Click"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="86"/><ColumnDefinition Width="30"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Settings.Accent}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/><TextBox x:Name="AccentHexText" Grid.Column="1" Text="#3B9EFF" TextChanged="AccentHexText_Changed" IsReadOnly="True" IsHitTestVisible="False" Background="Transparent" BorderThickness="0" Height="Auto" Padding="0" FontSize="11.5" Foreground="{DynamicResource TextQuietBrush}"/><Border x:Name="AccentPreview" Grid.Column="2" Background="{DynamicResource AccentBrush}" CornerRadius="5" Margin="7,0,0,0"/></Grid></Border>
+                                <Border Background="Transparent" Tag="Normal" Style="{StaticResource FlatCard}" Cursor="Hand" MouseLeftButtonUp="OpenColorPicker_Click"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="86"/><ColumnDefinition Width="30"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Settings.NormalTemperature}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/><TextBox x:Name="NormalColorText" Grid.Column="1" Text="#3B9EFF" TextChanged="TemperatureColorText_Changed" IsReadOnly="True" IsHitTestVisible="False" Background="Transparent" BorderThickness="0" Height="Auto" Padding="0" FontSize="11.5" Foreground="{DynamicResource TextQuietBrush}"/><Border x:Name="NormalColorPreview" Grid.Column="2" Background="{DynamicResource TempNormalBrush}" CornerRadius="5" Margin="7,0,0,0"/></Grid></Border>
+                                <Border Background="Transparent" Tag="Hot" Style="{StaticResource FlatCard}" Cursor="Hand" MouseLeftButtonUp="OpenColorPicker_Click"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="86"/><ColumnDefinition Width="30"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Settings.HotTemperature}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/><TextBox x:Name="HotColorText" Grid.Column="1" Text="#FFA83B" TextChanged="TemperatureColorText_Changed" IsReadOnly="True" IsHitTestVisible="False" Background="Transparent" BorderThickness="0" Height="Auto" Padding="0" FontSize="11.5" Foreground="{DynamicResource TextQuietBrush}"/><Border x:Name="HotColorPreview" Grid.Column="2" Background="{DynamicResource TempHotBrush}" CornerRadius="5" Margin="7,0,0,0"/></Grid></Border>
+                                <Border Background="Transparent" Tag="Critical" Style="{StaticResource FlatCard}" Cursor="Hand" MouseLeftButtonUp="OpenColorPicker_Click"><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="86"/><ColumnDefinition Width="30"/></Grid.ColumnDefinitions><TextBlock Text="{DynamicResource Settings.CriticalTemperature}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/><TextBox x:Name="CriticalColorText" Grid.Column="1" Text="#FF5C5C" TextChanged="TemperatureColorText_Changed" IsReadOnly="True" IsHitTestVisible="False" Background="Transparent" BorderThickness="0" Height="Auto" Padding="0" FontSize="11.5" Foreground="{DynamicResource TextQuietBrush}"/><Border x:Name="CriticalColorPreview" Grid.Column="2" Background="{DynamicResource TempCriticalBrush}" CornerRadius="5" Margin="7,0,0,0"/></Grid></Border>
+                            </StackPanel>
+                            <Button Content="{DynamicResource Settings.ResetColours}" Style="{StaticResource PillButton}" HorizontalAlignment="Left" Margin="0,14,0,8" Click="ResetColors_Click"/>
+                            <TextBlock Text="{DynamicResource Settings.GpuPrimary}" Style="{StaticResource FieldLabel}" Margin="0,10,0,8"/>
+                            <WrapPanel><RadioButton x:Name="GpuPrimaryTemperatureRadio" Content="{DynamicResource Common.Temperature}" GroupName="GpuPrimaryMetric" Margin="0,0,24,8"/><RadioButton x:Name="GpuPrimaryLoadRadio" Content="{DynamicResource Common.Load}" GroupName="GpuPrimaryMetric" Margin="0,0,0,8"/></WrapPanel>
+                            <TextBlock Text="{DynamicResource Settings.CpuPrimary}" Style="{StaticResource FieldLabel}" Margin="0,8,0,8"/>
+                            <WrapPanel><RadioButton x:Name="CpuPrimaryTemperatureRadio" Content="{DynamicResource Common.Temperature}" GroupName="CpuPrimaryMetric" Margin="0,0,24,8"/><RadioButton x:Name="CpuPrimaryLoadRadio" Content="{DynamicResource Common.Load}" GroupName="CpuPrimaryMetric" Margin="0,0,0,8"/></WrapPanel>
+                            <CheckBox x:Name="GraphsCheck" Content="{DynamicResource Settings.ShowGraphs}" Style="{StaticResource Toggle}"/><CheckBox x:Name="FansCheck" Content="{DynamicResource Settings.ShowFans}" Style="{StaticResource Toggle}"/>
+                        </StackPanel></Border>
+                        <TextBlock Text="{DynamicResource Head.Measures}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="{DynamicResource Settings.Unit}" Style="{StaticResource FieldLabel}" Margin="0,0,0,8"/><WrapPanel Margin="0,0,0,16"><RadioButton x:Name="CelsiusRadio" Checked="TemperatureUnit_Changed" Content="{DynamicResource Settings.UnitCelsius}" GroupName="Unit" Margin="0,0,24,8"/><RadioButton x:Name="FahrenheitRadio" Checked="TemperatureUnit_Changed" Content="{DynamicResource Settings.UnitFahrenheit}" GroupName="Unit"/></WrapPanel><TextBlock Text="{DynamicResource Settings.Refresh}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="RefreshCombo"><ComboBoxItem Content="{DynamicResource Settings.RefreshEverySecond}" Tag="1"/><ComboBoxItem Content="{DynamicResource Settings.RefreshEvery2}" Tag="2"/><ComboBoxItem Content="{DynamicResource Settings.RefreshEvery5}" Tag="5"/></ComboBox><TextBlock Text="{DynamicResource Settings.MaxDrives}" Style="{StaticResource FieldLabel}" Margin="0,14,0,6"/><ComboBox x:Name="DriveCountCombo"><ComboBoxItem Content="{DynamicResource Settings.Drive1}"/><ComboBoxItem Content="{DynamicResource Settings.Drive2}"/><ComboBoxItem Content="{DynamicResource Settings.Drive3}"/><ComboBoxItem Content="{DynamicResource Settings.Drive4}"/></ComboBox></StackPanel></Border>
+                        <TextBlock Text="{DynamicResource Monitor.Title}" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource Card}"><StackPanel>
+                            <TextBlock Text="{DynamicResource Monitor.ThresholdHelp}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,0,0,16"/>
+<Border Style="{StaticResource FlatCard}" Margin="0,0,0,12"><StackPanel>
+                                    <TextBlock Text="{DynamicResource Head.Processor}" FontWeight="SemiBold" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel><TextBlock Text="{DynamicResource Monitor.Warm}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="HotThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Warm}"/></StackPanel>
+                                        <StackPanel Grid.Column="2"><TextBlock Text="{DynamicResource Monitor.Critical}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="CriticalThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Critical}"/></StackPanel>
+                                    </Grid>
+                                </StackPanel></Border>
+<Border Style="{StaticResource FlatCard}" Margin="0,0,0,12"><StackPanel>
+                                    <TextBlock Text="{DynamicResource Head.GraphicsCard}" FontWeight="SemiBold" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel><TextBlock Text="{DynamicResource Monitor.Warm}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="GpuHotThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Warm}"/></StackPanel>
+                                        <StackPanel Grid.Column="2"><TextBlock Text="{DynamicResource Monitor.Critical}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="GpuCriticalThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Critical}"/></StackPanel>
+                                    </Grid>
+                                </StackPanel></Border>
+<Border Style="{StaticResource FlatCard}" Margin="0,0,0,12"><StackPanel>
+                                    <TextBlock Text="{DynamicResource Monitor.Storage}" FontWeight="SemiBold" Margin="0,0,0,12" TextWrapping="Wrap"/>
+                                    <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="12"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                                        <StackPanel><TextBlock Text="{DynamicResource Monitor.Warm}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="StorageHotThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Warm}"/></StackPanel>
+                                        <StackPanel Grid.Column="2"><TextBlock Text="{DynamicResource Monitor.Critical}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/><ComboBox x:Name="StorageCriticalThresholdCombo" SelectionChanged="MonitoringThreshold_Changed" AutomationProperties.Name="{DynamicResource Monitor.Critical}"/></StackPanel>
+                                    </Grid>
+                                </StackPanel></Border>
+                            <TextBlock x:Name="ThresholdWarning" Visibility="Collapsed" Style="{StaticResource MetaText}" Foreground="{DynamicResource TempHotBrush}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <CheckBox x:Name="ThermalNotificationsCheck" Style="{StaticResource Toggle}" Checked="NotificationToggle_Changed" Unchecked="NotificationToggle_Changed"><TextBlock Text="{DynamicResource Monitor.Notify}" TextWrapping="Wrap"/></CheckBox>
+                            <TextBlock Text="{DynamicResource Monitor.NotificationHelp}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <StackPanel x:Name="NotificationOptions" Visibility="Collapsed">
+                                <TextBlock Text="{DynamicResource Monitor.Delay}" Style="{StaticResource FieldLabel}" Margin="0,0,0,6"/>
+                                <ComboBox x:Name="AlertDelayCombo" AutomationProperties.Name="{DynamicResource Monitor.Delay}"/>
+                                <TextBlock Text="{DynamicResource Monitor.Cooldown}" Style="{StaticResource FieldLabel}" Margin="0,14,0,6"/>
+                                <ComboBox x:Name="AlertCooldownCombo" AutomationProperties.Name="{DynamicResource Monitor.Cooldown}"/>
+                            </StackPanel>
+                        </StackPanel></Border>
+                        <TextBlock Text="{DynamicResource Head.Behaviour}" Style="{StaticResource SectionTitle}"/><Border Style="{StaticResource Card}"><StackPanel><CheckBox x:Name="StartupCheck" Content="{DynamicResource Settings.StartWithWindows}" Style="{StaticResource Toggle}"/><CheckBox x:Name="TopmostCheck" Content="{DynamicResource Settings.AlwaysOnTop}" Style="{StaticResource Toggle}"/><CheckBox x:Name="MinimizeToTrayCheck" Style="{StaticResource Toggle}"><TextBlock Text="{DynamicResource Monitor.MinimizeToTray}" TextWrapping="Wrap"/></CheckBox><TextBlock Text="{DynamicResource Monitor.TrayHelp}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,0,0,10"/><CheckBox x:Name="ProcessesCheck" Content="{DynamicResource Settings.TrackProcesses}" Style="{StaticResource Toggle}"/></StackPanel></Border>
+                        <TextBlock x:Name="PurgeSectionTitle" Text="{DynamicResource Head.Data}" Style="{StaticResource SectionTitle}"/>
+                        <Border x:Name="PurgeSection" Style="{StaticResource Card}"><StackPanel>
+                            <TextBlock Text="{DynamicResource Settings.PurgeBody}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+                            <TextBlock x:Name="PurgeWarning" Visibility="Collapsed" Text="{DynamicResource Settings.PurgeWarning}" Foreground="{DynamicResource TempCriticalBrush}" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,10"/>
+                            <Button x:Name="PurgeButton" Content="{DynamicResource Settings.Purge}" Style="{StaticResource PillButton}" HorizontalAlignment="Left" Click="PurgeData_Click"/>
+                        </StackPanel></Border>
+                        <TextBlock Text="{DynamicResource Settings.VendorNote}" TextWrapping="Wrap" Style="{StaticResource MetaText}" Margin="2,16,2,0"/>
+                    </StackPanel></ScrollViewer>
+                    <Button x:Name="SaveSettingsButton" Grid.Row="2" Content="{DynamicResource Settings.Save}" Style="{StaticResource PrimaryButton}" Click="SaveSettings_Click"/>
+                </Grid>
+            </Border>
+
+            <!-- Opening the sensor stack takes tens of seconds on some machines; never show a grid of dashes meanwhile. -->
+            <Border x:Name="LoadingOverlay" Background="{DynamicResource CanvasBrush}" Panel.ZIndex="40">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="300">
+                    <Grid Width="44" Height="44" HorizontalAlignment="Center"><Rectangle Fill="{DynamicResource AccentBrush}"><Rectangle.OpacityMask><ImageBrush ImageSource="Assets/LogoOuter.png" Stretch="Uniform"/></Rectangle.OpacityMask></Rectangle><Rectangle Fill="{DynamicResource AccentDeepBrush}"><Rectangle.OpacityMask><ImageBrush ImageSource="Assets/LogoInner.png" Stretch="Uniform"/></Rectangle.OpacityMask></Rectangle></Grid>
+                    <TextBlock Text="Thermalyn" Style="{StaticResource PageTitle}" HorizontalAlignment="Center" Margin="0,14,0,0"/>
+                    <TextBlock x:Name="LoadingMessage" Text="{DynamicResource Status.ReadingSensors}" Style="{StaticResource MetaText}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,7,0,0"/>
+                    <Border Width="200" Height="3" Background="{DynamicResource BorderSubtleBrush}" CornerRadius="2" Margin="0,22,0,0" ClipToBounds="True" HorizontalAlignment="Center">
+                        <Border Width="70" Height="3" Background="{DynamicResource AccentBrush}" CornerRadius="2" HorizontalAlignment="Left">
+                            <Border.RenderTransform><TranslateTransform x:Name="LoadingSlide"/></Border.RenderTransform>
+                        </Border>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="ColorPickerOverlay" Visibility="Collapsed" Background="{DynamicResource ScrimBrush}" Panel.ZIndex="30" MouseLeftButtonUp="ColorPickerBackdrop_Click">
+                <Border Style="{StaticResource Card}" Background="{DynamicResource Surface1Brush}" BorderBrush="{DynamicResource BorderStrongBrush}" MaxWidth="410" MaxHeight="650" Margin="14" HorizontalAlignment="Center" VerticalAlignment="Center" MouseLeftButtonUp="ColorPickerCard_Click">
+                    <ScrollViewer><StackPanel><Grid Margin="0,0,0,14"><StackPanel><TextBlock x:Name="ColorPickerTitle" Text="{DynamicResource Picker.Title}" Style="{StaticResource PageTitle}" FontSize="18"/><TextBlock Text="{DynamicResource Picker.Subtitle}" Style="{StaticResource MetaText}" Margin="0,2,0,0"/></StackPanel><Button HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-6,-6,0" Style="{StaticResource IconButton}" Click="CancelPickerColor_Click"><controls:Icon Data="{StaticResource IconX}" Width="14" Height="14" StrokeThickness="1.7" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button></Grid><controls:ColorWheel x:Name="PopupColorWheel" Width="220" Height="220" HorizontalAlignment="Center" ColorChanged="PopupColorWheel_ColorChanged"/><TextBlock Text="{DynamicResource Picker.Brightness}" Style="{StaticResource FieldLabel}" Margin="0,12,0,2"/><Slider x:Name="PopupBrightnessSlider" Minimum="8" Maximum="100" Value="100" ValueChanged="PopupBrightnessSlider_ValueChanged"/><TextBlock Text="{DynamicResource Picker.Presets}" Style="{StaticResource FieldLabel}" Margin="0,10,0,8"/><WrapPanel><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#3B9EFF" Tag="#3B9EFF" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#4D9E92" Tag="#4D9E92" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#8A76C4" Tag="#8A76C4" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#FFA83B" Tag="#FFA83B" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#B06A87" Tag="#B06A87" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#5E9E68" Tag="#5E9E68" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#8A9099" Tag="#8A9099" Click="PopupSwatch_Click"/><Button Style="{StaticResource SwatchButton}" Margin="0,0,7,7" Background="#FF5C5C" Tag="#FF5C5C" Click="PopupSwatch_Click"/></WrapPanel><TextBlock Text="{DynamicResource Picker.Hex}" Style="{StaticResource FieldLabel}" Margin="0,6,0,6"/><Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="44"/></Grid.ColumnDefinitions><TextBox x:Name="PopupHexText" Text="#3B9EFF" TextChanged="PopupHexText_Changed"/><Border x:Name="PopupColorPreview" Grid.Column="1" Background="#3B9EFF" CornerRadius="6" Margin="8,0,0,0"/></Grid><TextBlock x:Name="ColorPickerWarning" Visibility="Collapsed" TextWrapping="Wrap" Foreground="{DynamicResource TempHotBrush}" FontSize="11" Margin="0,10,0,0"/><Grid Margin="0,18,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><Button Content="{DynamicResource Picker.Cancel}" Style="{StaticResource PillButton}" Height="36" Margin="0,0,4,0" Click="CancelPickerColor_Click"/><Button Grid.Column="1" Content="{DynamicResource Picker.Apply}" Style="{StaticResource PrimaryButton}" Margin="4,0,0,0" Click="ApplyPickerColor_Click"/></Grid></StackPanel></ScrollViewer>
+                </Border>
+            </Border>
+        </Grid>
+
+        <Border x:Name="BottomNavigation" Grid.Row="4" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="4">
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                <Button x:Name="CompactNavIcon" Grid.Column="0" Style="{StaticResource IconButton}" Click="Compact_Click" ToolTip="{DynamicResource Nav.Compact}"><controls:Icon Data="{StaticResource IconGauge}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button x:Name="BalancedNavIcon" Grid.Column="1" Style="{StaticResource IconButton}" Click="Balanced_Click" ToolTip="{DynamicResource Nav.Balanced}"><controls:Icon Data="{StaticResource IconLayoutDashboard}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button x:Name="DetailedNavIcon" Grid.Column="2" Style="{StaticResource IconButton}" Click="Detailed_Click" ToolTip="{DynamicResource Nav.Detailed}"><controls:Icon Data="{StaticResource IconChart}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button Grid.Column="3" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

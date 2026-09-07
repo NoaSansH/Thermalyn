@@ -1,0 +1,40 @@
+Thermalyn — moniteur matériel local pour Windows
+
+CONDITIONS D'UTILISATION
+
+Thermalyn est fourni tel quel, sans aucune garantie, expresse ou implicite.
+L'auteur ne peut être tenu responsable d'un dommage matériel ou logiciel
+résultant de son utilisation.
+
+ACCÈS BAS NIVEAU
+
+Thermalyn lit les capteurs du matériel. La température et la consommation du
+processeur ne sont pas publiées par Windows : elles demandent un accès direct
+aux registres du processeur. Cet accès passe par PawnIO, un pilote signé et
+libre, que ce programme d'installation propose d'installer s'il est absent.
+
+L'application démarre avec les droits administrateur pour la même raison.
+Elle fonctionne entièrement hors ligne et n'envoie aucune donnée.
+
+LICENCE
+
+Thermalyn est un logiciel libre : vous pouvez l'utiliser, l'étudier, le modifier
+et le redistribuer selon les termes de la GNU General Public License version 3,
+telle que publiée par la Free Software Foundation. Le texte complet est
+disponible sur https://www.gnu.org/licenses/ et dans le fichier LICENSE du dépôt.
+
+Thermalyn est distribué dans l'espoir qu'il sera utile, mais SANS AUCUNE
+GARANTIE, ni même la garantie implicite de QUALITÉ MARCHANDE ou d'ADÉQUATION À
+UN USAGE PARTICULIER.
+
+Code source : https://github.com/NoaSansH/Thermalyn
+
+COMPOSANTS TIERS
+
+- LibreHardwareMonitorLib — licence MPL-2.0
+  https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+- PawnIO — pilote d'accès bas niveau, distribué par namazso
+  https://pawnio.eu
+
+Le code source de LibreHardwareMonitor est disponible à l'adresse ci-dessus,
+conformément à la licence MPL-2.0.

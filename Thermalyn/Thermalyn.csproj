@@ -1,0 +1,101 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>Thermalyn</AssemblyName>
+    <RootNamespace>Thermalyn</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\Thermalyn.ico</ApplicationIcon>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- Carried into the executable, where Windows shows it under file properties. The copyright
+         line is what makes the GPL notice in LICENSE attach to an identified holder. -->
+    <Product>Thermalyn</Product>
+    <Company>Thermalyn Project</Company>
+    <Authors>Thermalyn Project</Authors>
+    <Copyright>Copyright (C) 2026 Thermalyn Project</Copyright>
+    <Description>Hardware monitor for Windows 11: processor, graphics, memory and drive sensors.</Description>
+    <PackageProjectUrl>https://github.com/NoaSansH/Thermalyn</PackageProjectUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <SatelliteResourceLanguages>fr</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- /p:PortableBuild=true: one self-contained, compressed executable. WPF is not trimmed. -->
+  <PropertyGroup Condition="'$(PortableBuild)' == 'true'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!-- /p:InstallerBuild=true: Inno Setup checks for the .NET Desktop Runtime 8 instead. -->
+  <PropertyGroup Condition="'$(InstallerBuild)' == 'true'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.7-pre729" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.1" />
+    <InternalsVisibleTo Include="Thermalyn.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Thermalyn.ico" />
+    <Resource Include="Assets\LogoOuter.png" />
+    <Resource Include="Assets\LogoInner.png" />
+  </ItemGroup>
+
+  <!-- The self-contained Desktop Runtime copies several WinForms, printing and diagnostic
+       surfaces that appear in no dependency graph of Thermalyn or LibreHardwareMonitor. -->
+  <Target Name="RemoveUnusedPortableDesktopFiles" AfterTargets="_ComputeFilesToBundle" Condition="'$(PortableBuild)' == 'true'">
+    <ItemGroup>
+      <_FilesToBundle Remove="@(_FilesToBundle)"
+        Condition="'%(Filename)' == 'System.Windows.Forms'
+          Or '%(Filename)' == 'System.Windows.Forms.Primitives'
+          Or '%(Filename)' == 'System.Windows.Forms.Design'
+          Or '%(Filename)' == 'System.Windows.Forms.Design.Editors'
+          Or '%(Filename)' == 'WindowsFormsIntegration'
+          Or '%(Filename)' == 'ReachFramework'
+          Or '%(Filename)' == 'PresentationUI'
+          Or '%(Filename)' == 'System.Printing'
+          Or '%(Filename)' == 'System.Drawing.Common'
+          Or '%(Filename)' == 'System.Drawing.Design'
+          Or '%(Filename)' == 'mscordaccore'
+          Or $([System.String]::Copy('%(Filename)').StartsWith('mscordaccore_'))
+          Or '%(Filename)' == 'mscordbi'
+          Or '%(Filename)' == 'dbgshim'
+          Or '%(Filename)' == 'createdump'
+          Or '%(Filename)' == 'clretwrc'
+          Or '%(Filename)' == 'Microsoft.DiaSymReader.Native.amd64'
+          Or '%(Filename)' == 'Microsoft.VisualBasic.Forms'
+          Or '%(Filename)' == 'System.Net.Quic'
+          Or '%(Filename)' == 'msquic'
+          Or '%(Filename)' == 'System.Net.HttpListener'
+          Or '%(Filename)' == 'System.Net.Mail'
+          Or '%(Filename)' == 'Microsoft.CSharp'
+          Or '%(Filename)' == 'Microsoft.VisualBasic.Core'
+          Or '%(Filename)' == 'System.DirectoryServices'
+          Or '%(Filename)' == 'System.Threading.Tasks.Dataflow'
+          Or '%(Filename)' == 'System.Formats.Tar'
+          Or '%(Filename)' == 'System.Linq.Parallel'" />
+    </ItemGroup>
+  </Target>
+
+</Project>
