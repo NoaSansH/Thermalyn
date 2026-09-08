@@ -1,0 +1,29 @@
+Thermalyn — avant l'installation
+
+ACCÈS BAS NIVEAU
+
+Thermalyn lit les capteurs matériels. La température et la consommation du
+processeur ne sont pas publiées par Windows : elles demandent un accès direct
+aux registres du processeur. Cet accès passe par PawnIO, un pilote open source
+signé, que cet installateur propose d'installer s'il est absent.
+
+L'application démarre avec les droits administrateur pour la même raison. Elle
+fonctionne entièrement hors ligne et n'envoie aucune donnée.
+
+AUCUNE GARANTIE
+
+Thermalyn est fourni tel quel, sans garantie d'aucune sorte, expresse ou
+implicite. L'auteur ne peut être tenu responsable d'un dommage matériel ou
+logiciel résultant de son utilisation.
+
+COMPOSANTS TIERS
+
+- LibreHardwareMonitorLib — licence MPL-2.0
+  https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+- PawnIO — pilote d'accès bas niveau, distribué par namazso
+  https://pawnio.eu
+
+Le code source de LibreHardwareMonitor est disponible à l'adresse ci-dessus,
+comme l'exige la licence MPL-2.0.
+
+Code source : https://github.com/NoaSansH/Thermalyn
