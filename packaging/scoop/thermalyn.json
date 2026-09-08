@@ -1,0 +1,33 @@
+{
+    "version": "1.0.1",
+    "description": "Hardware monitor for Windows 11: processor, graphics, memory and drive sensors.",
+    "homepage": "https://github.com/NoaSansH/Thermalyn",
+    "license": "GPL-3.0-or-later",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v1.0.1/Thermalyn-Portable.exe#/Thermalyn.exe",
+            "hash": "5a54e56525e590e0c30b9e55d021823c3257dbfffe700ecac4ae7aa669d08c95"
+        }
+    },
+    "bin": "Thermalyn.exe",
+    "shortcuts": [
+        [
+            "Thermalyn.exe",
+            "Thermalyn"
+        ]
+    ],
+    "notes": [
+        "Processor temperature and power draw need the PawnIO driver: https://pawnio.eu",
+        "Everything else works without it."
+    ],
+    "checkver": {
+        "github": "https://github.com/NoaSansH/Thermalyn"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v$version/Thermalyn-Portable.exe#/Thermalyn.exe"
+            }
+        }
+    }
+}

@@ -1,0 +1,40 @@
+Thermalyn — local hardware monitor for Windows
+
+TERMS OF USE
+
+Thermalyn is provided as is, without warranty of any kind, express or implied.
+The author cannot be held liable for any hardware or software damage resulting
+from its use.
+
+LOW-LEVEL ACCESS
+
+Thermalyn reads hardware sensors. Processor temperature and power draw are not
+published by Windows: they require direct access to the processor registers.
+That access goes through PawnIO, a signed open-source driver, which this
+installer offers to install when it is missing.
+
+The application starts with administrator rights for the same reason. It runs
+entirely offline and sends no data anywhere.
+
+LICENCE
+
+Thermalyn is free software: you may use, study, modify and redistribute it under
+the terms of the GNU General Public License version 3, as published by the Free
+Software Foundation. The full text is available at https://www.gnu.org/licenses/
+and in the LICENSE file of the source repository.
+
+Thermalyn is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY, without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+Source code: https://github.com/NoaSansH/Thermalyn
+
+THIRD-PARTY COMPONENTS
+
+- LibreHardwareMonitorLib — MPL-2.0 licence
+  https://github.com/LibreHardwareMonitor/LibreHardwareMonitor
+- PawnIO — low-level access driver, distributed by namazso
+  https://pawnio.eu
+
+The LibreHardwareMonitor source code is available at the address above, as
+required by the MPL-2.0 licence.

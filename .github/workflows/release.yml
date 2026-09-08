@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing vX.Y.Z tag to publish
+        required: true
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  CI: true
+
+jobs:
+  release:
+    name: Build GitHub Release
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.416
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Resolve and validate version
+        id: version
+        shell: pwsh
+        env:
+          REQUESTED_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          if ($env:REQUESTED_TAG -notmatch '^v(\d+\.\d+\.\d+)$') { throw 'Release tag must have the form vX.Y.Z.' }
+          "tag=$env:REQUESTED_TAG" >> $env:GITHUB_OUTPUT
+          "version=$($Matches[1])" >> $env:GITHUB_OUTPUT
+      - name: Restore locked dependencies and run tests
+        shell: pwsh
+        run: |
+          dotnet restore tests/Thermalyn.Tests/Thermalyn.Tests.csproj --locked-mode -p:NuGetAudit=true -p:NuGetAuditMode=all -p:TreatWarningsAsErrors=true
+          dotnet build tests/Thermalyn.Tests/Thermalyn.Tests.csproj -c Release --no-restore -warnaserror
+          dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --settings --repository-contracts --startup-registration
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress --yes
+      - name: Build and validate release
+        shell: pwsh
+        run: |
+          ./tools/build-release.ps1 -Version '${{ steps.version.outputs.version }}'
+          ./tools/verify-release.ps1
+          $release = 'artifacts/release'
+          # sha256sum reads the file name up to the newline. A carriage return joins the name
+          # and every entry fails to verify.
+          $lines = Get-FileHash "$release/Thermalyn-Setup.exe","$release/Thermalyn-Portable.exe","$release/Thermalyn-Setup-Offline.exe" -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" }
+          [IO.File]::WriteAllText("$release/SHA256SUMS.txt", ($lines -join "`n") + "`n", [Text.UTF8Encoding]::new($false))
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: |
+            artifacts/release/Thermalyn-Setup.exe
+            artifacts/release/Thermalyn-Portable.exe
+            artifacts/release/Thermalyn-Setup-Offline.exe
+      - name: Write the release notes
+        shell: pwsh
+        run: |
+          $release = 'artifacts/release'
+          @'
+          ## Which file do I download?
+
+          | | |
+          | --- | --- |
+          | **Thermalyn-Setup.exe** | **Start here.** Installs Thermalyn, adds a Start menu entry and an uninstaller, and sets up the sensor driver. Downloads the .NET runtime if your machine does not have it. |
+          | **Thermalyn-Portable.exe** | No installation at all. A single file: put it where you like, a USB stick included, and run it. |
+          | **Thermalyn-Setup-Offline.exe** | The same installer, with the .NET runtime already inside. For a machine with no internet connection. |
+
+          You only need one of the three.
+
+          Windows shows a reputation warning the first time, because the file is not code-signed:
+          choose **More info**, then **Run anyway**.
+
+          `SHA256SUMS.txt` lists the checksum of each file, if you want to confirm a download
+          arrived intact.
+
+          ## Checking that a file is genuine
+
+          Every executable carries a signed build provenance attestation. It proves the file was
+          produced by this repository's workflow, from this tag, and not modified since. With the
+          GitHub CLI:
+
+          ```
+          gh attestation verify Thermalyn-Setup.exe --repo NoaSansH/Thermalyn
+          ```
+
+          You can also look each file up on VirusTotal by its checksum:
+
+          '@ | Set-Content -Encoding utf8 release-notes.md
+
+          Get-Content "$release/SHA256SUMS.txt" | ForEach-Object {
+            $hash, $name = $_ -split '\s+', 2
+            "- [$($name.Trim())](https://www.virustotal.com/gui/file/$hash)"
+          } | Add-Content -Encoding utf8 release-notes.md
+
+          @'
+
+          ---
+
+          Thermalyn is free software under the GNU General Public License v3.0. These executables
+          were built by GitHub Actions from this tag, so their complete corresponding source is the
+          repository at this same tag.
+          '@ | Add-Content -Encoding utf8 release-notes.md
+      - name: Publish immutable GitHub Release assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create '${{ steps.version.outputs.tag }}'
+          artifacts/release/Thermalyn-Setup.exe
+          artifacts/release/Thermalyn-Portable.exe
+          artifacts/release/Thermalyn-Setup-Offline.exe
+          artifacts/release/SHA256SUMS.txt
+          --verify-tag
+          --notes-file release-notes.md
+          --title 'Thermalyn ${{ steps.version.outputs.version }}'

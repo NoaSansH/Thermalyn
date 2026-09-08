@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>thermalyn</id>
+    <version>1.0.1</version>
+    <packageSourceUrl>https://github.com/NoaSansH/Thermalyn/tree/main/packaging/chocolatey</packageSourceUrl>
+    <owners>NoaSansH</owners>
+    <title>Thermalyn</title>
+    <authors>Thermalyn Project</authors>
+    <projectUrl>https://github.com/NoaSansH/Thermalyn</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/NoaSansH/Thermalyn/main/Thermalyn/Assets/LogoOuter.png</iconUrl>
+    <copyright>Copyright (C) 2026 Thermalyn Project</copyright>
+    <licenseUrl>https://github.com/NoaSansH/Thermalyn/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectSourceUrl>https://github.com/NoaSansH/Thermalyn</projectSourceUrl>
+    <bugTrackerUrl>https://github.com/NoaSansH/Thermalyn/issues</bugTrackerUrl>
+    <tags>hardware-monitor temperature cpu gpu sensors system-monitor windows admin</tags>
+    <summary>Hardware monitor for Windows 11: processor, graphics, memory and drive sensors.</summary>
+    <description><![CDATA[
+Thermalyn reads processor, graphics, memory and drive sensors and keeps a 15-minute history.
+
+* Compact, Balanced and Detailed views that follow the window size
+* English and French interface, switched at runtime
+* Dark and light themes, customizable accent and threshold colours
+* Per-component warm and critical thresholds, with a history of every crossing
+* Sensors selected by exact name, never inferred: an unidentified reading is reported as absent
+  rather than approximated
+
+It runs entirely offline. No account, no telemetry, no background service.
+
+Processor temperature and power draw need the PawnIO driver, which the installer sets up.
+]]></description>
+    <releaseNotes>https://github.com/NoaSansH/Thermalyn/releases/tag/v1.0.1</releaseNotes>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>
