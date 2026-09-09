@@ -1,0 +1,16 @@
+# Build output
+**/bin/
+**/obj/
+artifacts/
+.nuget/
+.vs/
+*.user
+
+
+# Local diagnostics
+diagnostic.log
+
+# PawnIO is GPL-licensed and published by its author. Thermalyn drives it through the device
+# interface and does not redistribute it. Only the installer bundles a copy, fetched at build
+# time from https://pawnio.eu into this path.
+/Thermalyn/Assets/PawnIO_setup.exe
