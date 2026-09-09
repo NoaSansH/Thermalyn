@@ -12,6 +12,7 @@ public partial class MainWindow
     private void LoadSettingsControls()
     {
         _loadingSettings = true;
+        RefreshSettingsUpdateStatus();
         var language = LocalizationService.Normalize(_settings.Language);
         EnglishRadio.IsChecked = language == LocalizationService.English;
         FrenchRadio.IsChecked = language == LocalizationService.French;
@@ -65,6 +66,10 @@ public partial class MainWindow
     private void OnClosed(object? sender, EventArgs e)
     {
         _isClosed = true;
+        System.Net.NetworkInformation.NetworkChange.NetworkAvailabilityChanged -= OnNetworkAvailabilityChanged;
+        _updateCancellation.Cancel();
+        _updateCancellation.Dispose();
+        _updateService.Dispose();
         _tray?.Dispose();
         _tray = null;
         _timer.Stop();

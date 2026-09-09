@@ -1,6 +1,6 @@
 #define AppName "Thermalyn"
 #ifndef AppVersion
-  #define AppVersion "1.0.4"
+  #define AppVersion "1.0.5"
 #endif
 #define AppPublisher "Thermalyn Project"
 #define AppExe "Thermalyn.exe"
@@ -89,6 +89,7 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExe}"; Comment: "{cm:Lau
 ; -install -silent are the switches documented by the PawnIO author.
 Filename: "{tmp}\PawnIO_setup.exe"; Parameters: "-install -silent"; StatusMsg: "{cm:InstallingDriver}"; Flags: waituntilterminated runhidden; Check: PawnIoMissing
 Filename: "{app}\{#AppExe}"; Description: "{cm:LaunchApp,{#AppName}}"; Flags: nowait postinstall skipifsilent runascurrentuser
+Filename: "{app}\{#AppExe}"; Flags: nowait runascurrentuser skipifnotsilent; Check: IsUpdateMode
 
 [UninstallRun]
 ; ExecAsOriginalUser is unavailable during uninstall, and an elevated reg.exe writes the
@@ -130,6 +131,11 @@ function InstalledVersion: String;
 begin
   Result := '';
   RegQueryStringValue(HKLM, AppUninstallKey, 'DisplayVersion', Result);
+end;
+
+function IsUpdateMode: Boolean;
+begin
+  Result := ExpandConstant('{param:UPDATE|0}') = '1';
 end;
 
 procedure InitializeWizard;

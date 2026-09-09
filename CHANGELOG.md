@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.5 — 2026-09-09
+
+- Thermalyn checks the latest stable GitHub Release when it starts and quietly retries after the
+  network returns, with throttling to avoid repeated requests.
+- A discreet title-bar button shows a badge when an update exists. Its panel presents the new
+  version, release notes, download progress and clear errors.
+- Settings now includes a manual **Check for updates** action and the result of the latest check.
+- Downloads are verified against the GitHub Release asset size and `SHA256SUMS.txt`, then checked
+  again under a file lock immediately before the installer starts.
+- **Restart and install** remains an explicit user action. The compact Inno Setup update replaces
+  the application and starts the new version when it finishes.
+
 ## 1.0.4 — 2026-09-09
 
 - Memory temperature no longer borrows the drive thresholds. A DIMM at 60 °C was shown as warm;

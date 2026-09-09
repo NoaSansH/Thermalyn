@@ -122,6 +122,7 @@ public partial class MainWindow : Window
         UpdateTray();
         _events.Load();
         BuildThermalEvents();
+        StartUpdateMonitoring();
 
         SetStatus(LocalizationService.Get("Status.QuickRead"));
         _snapshot = await Task.Run(QuickReadService.Read);
