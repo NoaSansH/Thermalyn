@@ -91,6 +91,7 @@
         <Border x:Name="NavigationBar" Grid.Row="1" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="32,0">
             <Grid>
                 <StackPanel Orientation="Horizontal">
+                    <Button x:Name="MiniButton" Content="{DynamicResource Nav.Mini}" Style="{StaticResource NavButton}" Click="Mini_Click"/>
                     <Button x:Name="CompactButton" Content="{DynamicResource Nav.Compact}" Style="{StaticResource NavButton}" Click="Compact_Click"/>
                     <Button x:Name="BalancedButton" Content="{DynamicResource Nav.Balanced}" Style="{StaticResource NavButton}" Click="Balanced_Click"/>
                     <Button x:Name="DetailedButton" Content="{DynamicResource Nav.Detailed}" Style="{StaticResource NavButton}" Click="Detailed_Click"/>
@@ -212,6 +213,49 @@
                             </Border>
                         </StackPanel>
                     </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <ScrollViewer x:Name="MiniView" Visibility="Collapsed" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" HorizontalContentAlignment="Stretch" Padding="32,28">
+                <StackPanel HorizontalAlignment="Stretch" MaxWidth="1080">
+                    <Grid x:Name="MiniHeader" Margin="2,0,2,14">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                        <StackPanel>
+                            <TextBlock x:Name="MiniStatusText" Text="{DynamicResource Status.ReadingSensors}" Style="{StaticResource MetaText}"/>
+                            <TextBlock x:Name="MiniSessionSince" Style="{StaticResource MetaText}" Margin="0,3,0,0"/>
+                        </StackPanel>
+                        <StackPanel x:Name="MiniActions" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="{DynamicResource Session.Reset}" Style="{StaticResource PillButton}" Height="30" Margin="0,0,8,0" Click="ResetSession_Click"/>
+                            <Button x:Name="CopyDiagnosticButton" Content="{DynamicResource Session.Copy}" Style="{StaticResource PillButton}" Height="30" Click="CopyDiagnostic_Click"/>
+                        </StackPanel>
+                    </Grid>
+                    <UniformGrid x:Name="MiniCardsGrid" Columns="3" Margin="-8,0">
+                        <Border x:Name="MiniCpuCard" Style="{StaticResource Card}" Margin="8,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconCpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Head.Processor}" Style="{StaticResource ComponentTitle}" Margin="9,0,0,0"/></StackPanel>
+                                <TextBlock x:Name="MiniCpuValue" Text="—" FontSize="34" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Margin="0,10,0,0"/>
+                                <TextBlock x:Name="MiniCpuSecondary" Style="{StaticResource MetaText}" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="MiniCpuRange" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border x:Name="MiniGpuCard" Style="{StaticResource Card}" Margin="8,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconGpu}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Head.GraphicsCard}" Style="{StaticResource ComponentTitle}" Margin="9,0,0,0"/></StackPanel>
+                                <TextBlock x:Name="MiniGpuValue" Text="—" FontSize="34" FontWeight="SemiBold" Style="{StaticResource MonoValue}" Margin="0,10,0,0"/>
+                                <TextBlock x:Name="MiniGpuSecondary" Style="{StaticResource MetaText}" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="MiniGpuRange" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Border x:Name="MiniRamCard" Style="{StaticResource Card}" Margin="8,0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal"><controls:Icon Data="{StaticResource IconMemory}" Width="14" Height="14" Stroke="{DynamicResource IconBrush}" StrokeThickness="1.8"/><TextBlock Text="{DynamicResource Common.Memory}" Style="{StaticResource ComponentTitle}" Margin="9,0,0,0"/></StackPanel>
+                                <TextBlock x:Name="MiniRamValue" Text="—" FontSize="34" FontWeight="SemiBold" Foreground="{DynamicResource AccentBrush}" Style="{StaticResource MonoValue}" Margin="0,10,0,0"/>
+                                <TextBlock x:Name="MiniRamSecondary" Style="{StaticResource MetaText}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/>
+                                <TextBlock x:Name="MiniRamRange" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="0,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+                    <TextBlock Text="{DynamicResource Session.MemoryOnly}" Style="{StaticResource MetaText}" TextWrapping="Wrap" Margin="2,14,2,0"/>
                 </StackPanel>
             </ScrollViewer>
 
@@ -445,11 +489,12 @@
         </Grid>
 
         <Border x:Name="BottomNavigation" Grid.Row="4" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="4">
-            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
-                <Button x:Name="CompactNavIcon" Grid.Column="0" Style="{StaticResource IconButton}" Click="Compact_Click" ToolTip="{DynamicResource Nav.Compact}"><controls:Icon Data="{StaticResource IconGauge}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
-                <Button x:Name="BalancedNavIcon" Grid.Column="1" Style="{StaticResource IconButton}" Click="Balanced_Click" ToolTip="{DynamicResource Nav.Balanced}"><controls:Icon Data="{StaticResource IconLayoutDashboard}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
-                <Button x:Name="DetailedNavIcon" Grid.Column="2" Style="{StaticResource IconButton}" Click="Detailed_Click" ToolTip="{DynamicResource Nav.Detailed}"><controls:Icon Data="{StaticResource IconChart}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
-                <Button Grid.Column="3" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                <Button x:Name="MiniNavIcon" Grid.Column="0" Style="{StaticResource IconButton}" Click="Mini_Click" ToolTip="{DynamicResource Nav.Mini}"><controls:Icon Data="{StaticResource IconActivity}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button x:Name="CompactNavIcon" Grid.Column="1" Style="{StaticResource IconButton}" Click="Compact_Click" ToolTip="{DynamicResource Nav.Compact}"><controls:Icon Data="{StaticResource IconGauge}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button x:Name="BalancedNavIcon" Grid.Column="2" Style="{StaticResource IconButton}" Click="Balanced_Click" ToolTip="{DynamicResource Nav.Balanced}"><controls:Icon Data="{StaticResource IconLayoutDashboard}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button x:Name="DetailedNavIcon" Grid.Column="3" Style="{StaticResource IconButton}" Click="Detailed_Click" ToolTip="{DynamicResource Nav.Detailed}"><controls:Icon Data="{StaticResource IconChart}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button Grid.Column="4" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
             </Grid>
         </Border>
     </Grid>

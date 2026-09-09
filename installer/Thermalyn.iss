@@ -1,6 +1,6 @@
 #define AppName "Thermalyn"
 #ifndef AppVersion
-  #define AppVersion "1.0.5"
+  #define AppVersion "1.1.0"
 #endif
 #define AppPublisher "Thermalyn Project"
 #define AppExe "Thermalyn.exe"

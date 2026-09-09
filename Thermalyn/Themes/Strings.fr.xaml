@@ -7,6 +7,7 @@
     <sys:String x:Key="Window.Restore">Restaurer</sys:String>
     <sys:String x:Key="Window.Close">Fermer</sys:String>
     <sys:String x:Key="Nav.Compact">Compact</sys:String>
+    <sys:String x:Key="Nav.Mini">Mini</sys:String>
     <sys:String x:Key="Nav.Balanced">Équilibré</sys:String>
     <sys:String x:Key="Nav.Detailed">Détaillé</sys:String>
     <sys:String x:Key="Nav.Settings">Paramètres</sys:String>
@@ -253,4 +254,15 @@
     <sys:String x:Key="Update.NotChecked">Version installée : {0}</sys:String>
     <sys:String x:Key="Update.CheckNow">Vérifier les mises à jour</sys:String>
     <sys:String x:Key="Update.SettingsAvailable">Version {0} disponible.</sys:String>
+    <sys:String x:Key="Session.Since">Session démarrée à {0:t}</sys:String>
+    <sys:String x:Key="Session.Started">Début de la session</sys:String>
+    <sys:String x:Key="Session.Load">Charge · {0}</sys:String>
+    <sys:String x:Key="Session.Range">Min. {0} · Moy. {1} · Max. {2}</sys:String>
+    <sys:String x:Key="Session.NoData">Pas encore de mesure</sys:String>
+    <sys:String x:Key="Session.Reset">Réinitialiser</sys:String>
+    <sys:String x:Key="Session.Copy">Copier le diagnostic</sys:String>
+    <sys:String x:Key="Session.Copied">Diagnostic copié</sys:String>
+    <sys:String x:Key="Session.CopyFailed">Impossible de copier le diagnostic : {0}</sys:String>
+    <sys:String x:Key="Session.MemoryOnly">Les statistiques de cette session restent uniquement en mémoire et disparaissent à la fermeture.</sys:String>
+    <sys:String x:Key="Common.Error">Erreur</sys:String>
 </ResourceDictionary>

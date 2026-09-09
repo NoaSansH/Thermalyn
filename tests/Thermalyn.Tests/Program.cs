@@ -12,6 +12,7 @@ using Thermalyn.Services;
 if (args.Contains("--layout")) { LayoutChecks.Run(); return; }
 if (args.Contains("--live-update")) { await UpdateServiceChecks.RunLiveAsync(); return; }
 MonitoringChecks.Run();
+SessionStatisticsChecks.Run();
 
 if (!UpdateService.TryParseVersion("v1.2.3", out var updateVersion) || updateVersion != new Version(1, 2, 3))
     throw new InvalidOperationException("The updater did not parse a valid GitHub release tag.");
@@ -189,7 +190,7 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
     }
 
     var mainWindow = File.ReadAllText(Path.Combine(repository, "Thermalyn", "MainWindow.xaml"));
-    foreach (var requiredName in new[] { "CompactView", "BalancedView", "DetailedView", "DetailsView", "SettingsView", "ColorPickerOverlay" })
+    foreach (var requiredName in new[] { "MiniView", "CompactView", "BalancedView", "DetailedView", "DetailsView", "SettingsView", "ColorPickerOverlay" })
     {
         if (!mainWindow.Contains($"x:Name=\"{requiredName}\"", StringComparison.Ordinal))
             throw new InvalidOperationException($"Required UI surface '{requiredName}' is missing from MainWindow.xaml.");

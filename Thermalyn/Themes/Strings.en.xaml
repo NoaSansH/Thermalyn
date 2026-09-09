@@ -7,6 +7,7 @@
     <sys:String x:Key="Window.Restore">Restore</sys:String>
     <sys:String x:Key="Window.Close">Close</sys:String>
     <sys:String x:Key="Nav.Compact">Compact</sys:String>
+    <sys:String x:Key="Nav.Mini">Mini</sys:String>
     <sys:String x:Key="Nav.Balanced">Balanced</sys:String>
     <sys:String x:Key="Nav.Detailed">Detailed</sys:String>
     <sys:String x:Key="Nav.Settings">Settings</sys:String>
@@ -253,4 +254,15 @@
     <sys:String x:Key="Update.NotChecked">Installed version: {0}</sys:String>
     <sys:String x:Key="Update.CheckNow">Check for updates</sys:String>
     <sys:String x:Key="Update.SettingsAvailable">Version {0} is available.</sys:String>
+    <sys:String x:Key="Session.Since">Session started at {0:t}</sys:String>
+    <sys:String x:Key="Session.Started">Session started</sys:String>
+    <sys:String x:Key="Session.Load">Load · {0}</sys:String>
+    <sys:String x:Key="Session.Range">Min. {0} · Avg. {1} · Max. {2}</sys:String>
+    <sys:String x:Key="Session.NoData">No measurement yet</sys:String>
+    <sys:String x:Key="Session.Reset">Reset</sys:String>
+    <sys:String x:Key="Session.Copy">Copy diagnostics</sys:String>
+    <sys:String x:Key="Session.Copied">Diagnostics copied</sys:String>
+    <sys:String x:Key="Session.CopyFailed">Could not copy diagnostics: {0}</sys:String>
+    <sys:String x:Key="Session.MemoryOnly">Session statistics stay in memory only and disappear when the application closes.</sys:String>
+    <sys:String x:Key="Common.Error">Error</sys:String>
 </ResourceDictionary>

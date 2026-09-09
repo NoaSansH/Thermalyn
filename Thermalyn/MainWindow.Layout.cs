@@ -42,7 +42,7 @@ public partial class MainWindow
         DetailSummaryGrid.Margin = detailWide ? new Thickness(24, 0, 0, 0) : new Thickness(0, 14, 0, 0);
 
         var pageMargin = new Thickness(pagePadding, shortWindow ? 14 : pagePadding - 4, pagePadding, shortWindow ? 14 : pagePadding - 4);
-        BalancedView.Padding = CompactView.Padding = DetailedView.Padding = pageMargin;
+        BalancedView.Padding = MiniView.Padding = CompactView.Padding = DetailedView.Padding = pageMargin;
         DetailsView.Padding = SettingsView.Padding = pageMargin;
 
         var heroChart = shortWindow ? 88d : 120d;
@@ -61,6 +61,12 @@ public partial class MainWindow
         CompactCpuTemp.FontSize = CompactGpuTemp.FontSize = DetailedCpuValue.FontSize = DetailedGpuValue.FontSize = DetailedRamPercent.FontSize = denseSize;
         CompactCpuTemp.LineHeight = CompactGpuTemp.LineHeight = DetailedCpuValue.LineHeight = DetailedGpuValue.LineHeight = DetailedRamPercent.LineHeight = denseSize * 1.1;
         CompactCardsGrid.Columns = contentWidth < 560 ? 1 : 2;
+        MiniCardsGrid.Columns = contentWidth < 680 ? 1 : 3;
+        SpaceCards(MiniCardsGrid);
+        var miniNarrow = contentWidth < 520;
+        Grid.SetRow(MiniActions, miniNarrow ? 1 : 0);
+        MiniActions.HorizontalAlignment = miniNarrow ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+        MiniActions.Margin = miniNarrow ? new Thickness(0, 10, 0, 0) : new Thickness(0);
         SpaceCards(HeroGrid); SpaceCards(CompactCardsGrid); SpaceCards(DetailedChartGrid);
         var compactNarrow = (contentWidth - pagePadding * 2) / CompactCardsGrid.Columns < 360;
         var detailedNarrow = (contentWidth - pagePadding * 2) / DetailedChartGrid.Columns < 360;

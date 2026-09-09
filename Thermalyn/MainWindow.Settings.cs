@@ -82,6 +82,7 @@ public partial class MainWindow
     private void CpuCard_Click(object sender, MouseButtonEventArgs e) => ShowDetails(_snapshot.Cpu);
     private void GpuCard_Click(object sender, MouseButtonEventArgs e) => ShowDetails(_snapshot.Gpu);
     private void RamCard_Click(object sender, MouseButtonEventArgs e) => ShowDetails(_snapshot.Memory);
+    private void Mini_Click(object sender, RoutedEventArgs e) => ApplyMode("Mini");
     private void Compact_Click(object sender, RoutedEventArgs e) => ApplyMode("Compact");
     private void Balanced_Click(object sender, RoutedEventArgs e) => ApplyMode("Balanced");
     private void Detailed_Click(object sender, RoutedEventArgs e) => ApplyMode("Detailed");

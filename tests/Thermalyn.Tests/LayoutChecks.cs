@@ -44,7 +44,7 @@ internal static class LayoutChecks
         var count = 0;
         foreach (var (width, height) in new[] { (320, 480), (390, 844), (560, 720), (820, 600), (1200, 820), (1920, 1080) })
             foreach (var (language, theme) in new[] { ("fr", "Dark"), ("en", "Light") })
-                foreach (var page in new[] { "Balanced", "Compact", "Detailed", "Details", "Settings" })
+                foreach (var page in new[] { "Mini", "Balanced", "Compact", "Detailed", "Details", "Settings" })
                 {
                     window.Width = width; window.Height = height; Pump();
                     window.PreparePreviewAsync(new AppSettings
@@ -85,7 +85,7 @@ internal static class LayoutChecks
         if (((Button)window.FindName("SaveSettingsButton")).IsEnabled) throw new InvalidOperationException("Invalid thresholds can be saved.");
         ((RadioButton)window.FindName("CelsiusRadio")).IsChecked = true;
         if (hot.SelectedItem is not ComboBoxItem { Tag: 77 }) throw new InvalidOperationException("Changing temperature units changed the threshold.");
-        foreach (var page in new[] { "Balanced", "Compact", "Detailed" })
+        foreach (var page in new[] { "Mini", "Balanced", "Compact", "Detailed" })
         {
             stress.ViewMode = page;
             window.PreparePreviewAsync(stress, page).GetAwaiter().GetResult(); Pump();
@@ -93,16 +93,20 @@ internal static class LayoutChecks
         }
         window.Width = 1200; window.Height = 820; Pump();
         var order = new AppSettings { GpuFirst = true };
-        foreach (var page in new[] { "Balanced", "Compact", "Detailed" })
+        foreach (var page in new[] { "Mini", "Balanced", "Compact", "Detailed" })
         {
             order.ViewMode = page;
             window.PreparePreviewAsync(order, page).GetAwaiter().GetResult(); Pump();
             Save(window, Path.Combine(output, "gpu-first-" + page + ".png"));
         }
         AssertFirstCard(window, "GpuHeroCard");
+        if (!ReferenceEquals(((UniformGrid)window.FindName("MiniCardsGrid")).Children[0], window.FindName("MiniGpuCard")))
+            throw new InvalidOperationException("Mini view did not put the graphics card first.");
         order.GpuFirst = false; order.ViewMode = "Balanced";
         window.PreparePreviewAsync(order, "Balanced").GetAwaiter().GetResult(); Pump();
         AssertFirstCard(window, "CpuHeroCard");
+        if (!ReferenceEquals(((UniformGrid)window.FindName("MiniCardsGrid")).Children[0], window.FindName("MiniCpuCard")))
+            throw new InvalidOperationException("Mini view did not restore the processor first.");
 
         window.Close(); app.Shutdown();
         Console.WriteLine($"Layout: {count} window/language/theme/page combinations rendered to {output}");

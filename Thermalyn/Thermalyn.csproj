@@ -7,7 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <AssemblyName>Thermalyn</AssemblyName>
-    <Version>1.0.5</Version>
+    <Version>1.1.0</Version>
     <RootNamespace>Thermalyn</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\Thermalyn.ico</ApplicationIcon>

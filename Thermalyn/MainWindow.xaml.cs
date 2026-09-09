@@ -53,6 +53,7 @@ public partial class MainWindow : Window
 
     private readonly List<(UniformGrid Grid, UIElement Cpu, UIElement Gpu)> _cardPairs = [];
     private UIElement[] _secondaryOrder = [];
+    private UIElement[] _miniOrder = [];
 
     private static readonly Dictionary<string, (string Accent, string Normal, string Hot, string Critical)> Palettes = new()
     {
@@ -90,6 +91,7 @@ public partial class MainWindow : Window
         foreach (var grid in new[] { HeroGrid, CompactCardsGrid, DetailedChartGrid, DetailedSensorGrid })
             _cardPairs.Add((grid, grid.Children[0], grid.Children[1]));
         _secondaryOrder = SecondaryMetrics.Children.Cast<UIElement>().ToArray();
+        _miniOrder = MiniCardsGrid.Children.Cast<UIElement>().ToArray();
         AppVersionText.Text = $"Thermalyn {typeof(App).Assembly.GetName().Version?.ToString(3)}".TrimEnd();
         DataContext = _viewModel;
         if (!previewMode) { Loaded += OnLoaded; Closed += OnClosed; }
@@ -184,6 +186,7 @@ public partial class MainWindow : Window
     private void SetStatus(string message)
     {
         StatusText.Text = message;
+        MiniStatusText.Text = message;
         CompactStatusText.Text = message;
         DetailedStatusText.Text = message;
         if (LoadingOverlay.Visibility == Visibility.Visible) LoadingMessage.Text = message;
@@ -235,6 +238,7 @@ public partial class MainWindow : Window
         AppendHistory(_cpuLoadHistory, _snapshot.Cpu.Load);
         AppendHistory(_gpuLoadHistory, _snapshot.Gpu.Load);
         AppendHistory(_ramHistory, _snapshot.Memory.Load);
+        TrackAndRenderSession();
 
         UpdateCard(_snapshot.Cpu, CpuHeroCard.Secondary, CpuHeroCard.Fan, cpuFan, _cpuHistory);
         CpuHeroCard.NameValue.Text = _snapshot.Cpu.Name;
@@ -399,6 +403,10 @@ public partial class MainWindow : Window
         foreach (var (grid, cpu, gpu) in _cardPairs)
             Reorder(grid, _settings.GpuFirst ? [gpu, cpu] : [cpu, gpu]);
 
+        Reorder(MiniCardsGrid, _settings.GpuFirst
+            ? [_miniOrder[1], _miniOrder[0], _miniOrder[2]]
+            : _miniOrder);
+
         Reorder(SecondaryMetrics, _settings.GpuFirst
             ? _secondaryOrder.OrderBy(child => ReferenceEquals(child, GpuPowerMetric) ? 0 : 1).ToArray()
             : _secondaryOrder);
@@ -413,10 +421,11 @@ public partial class MainWindow : Window
 
     private void ApplyMode(string mode)
     {
+        mode = mode is "Mini" or "Compact" or "Balanced" or "Detailed" ? mode : "Balanced";
         ApplyCardOrder();
         _settings.ViewMode = mode; _panelOverlayMode = false; DetailsView.Visibility = SettingsView.Visibility = Visibility.Collapsed; HideMainViews();
-        (mode switch { "Compact" => CompactView, "Detailed" => DetailedView, _ => BalancedView }).Visibility = Visibility.Visible;
-        MarkMode(CompactButton, CompactNavIcon, mode == "Compact"); MarkMode(BalancedButton, BalancedNavIcon, mode == "Balanced"); MarkMode(DetailedButton, DetailedNavIcon, mode == "Detailed");
+        (mode switch { "Mini" => MiniView, "Compact" => CompactView, "Detailed" => DetailedView, _ => BalancedView }).Visibility = Visibility.Visible;
+        MarkMode(MiniButton, MiniNavIcon, mode == "Mini"); MarkMode(CompactButton, CompactNavIcon, mode == "Compact"); MarkMode(BalancedButton, BalancedNavIcon, mode == "Balanced"); MarkMode(DetailedButton, DetailedNavIcon, mode == "Detailed");
         ApplyDataVisibility();
         ApplyResponsiveLayout();
         DrawAllHistory();
@@ -562,11 +571,11 @@ public partial class MainWindow : Window
         }
     }
 
-    private void HideMainViews() => BalancedView.Visibility = CompactView.Visibility = DetailedView.Visibility = Visibility.Collapsed;
+    private void HideMainViews() => MiniView.Visibility = BalancedView.Visibility = CompactView.Visibility = DetailedView.Visibility = Visibility.Collapsed;
     private void ShowCurrentModeBehindPanel()
     {
         HideMainViews();
-        (_settings.ViewMode switch { "Compact" => CompactView, "Detailed" => DetailedView, _ => BalancedView }).Visibility = Visibility.Visible;
+        (_settings.ViewMode switch { "Mini" => MiniView, "Compact" => CompactView, "Detailed" => DetailedView, _ => BalancedView }).Visibility = Visibility.Visible;
     }
 
     private void ConfigureDetailsPage()

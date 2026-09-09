@@ -13,10 +13,12 @@
 [![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Fran%C3%A7ais-1A5C9E)](#what-it-reports)
 
 Hardware monitor for Windows 11. Reads processor, graphics, memory and drive sensors, keeps a
-15-minute history, and stays readable whether the window is a narrow strip in a corner of the
-screen or spread across a monitor.
+15-minute in-memory history, and stays readable whether the window is a narrow strip in a corner
+of the screen or spread across a monitor. The Mini view adds session min/average/max values without
+writing more data to disk.
 
-It works offline. No account, no telemetry, no updater and no background service.
+It works offline. No account, no telemetry and no background service. Its updater only contacts
+GitHub Releases to check and download a version after explicit user confirmation.
 
 ![Balanced view](docs/images/balanced.png)
 
@@ -136,16 +138,16 @@ dotnet run --project .\Thermalyn\Thermalyn.csproj
 
 ### Publish a version detected by the updater
 
-1. Choose a three-part version such as `1.0.6` and add a matching `## 1.0.6` section to
+1. Choose a three-part version such as `1.1.1` and add a matching `## 1.1.1` section to
    `CHANGELOG.md`.
 2. Set that same version in `Thermalyn/Thermalyn.csproj`, `installer/Thermalyn.iss` and the default
    value in `tools/build-release.ps1`.
 3. Commit and push those changes, then create and push the matching tag:
 
 ```powershell
-git tag -a v1.0.6 -m "Thermalyn 1.0.6"
+git tag -a v1.1.1 -m "Thermalyn 1.1.1"
 git push origin main
-git push origin v1.0.6
+git push origin v1.1.1
 ```
 
 The Release workflow tests and builds the project, creates `Thermalyn-Setup.exe`, writes
