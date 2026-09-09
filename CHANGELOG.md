@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 — 2026-09-09
+
+- A new Mini view keeps processor, graphics and memory readable in a small window.
+- Minimum, average and maximum values are calculated for the current session without writing any
+  additional history to disk. They can be reset at any time.
+- A concise diagnostic snapshot can be copied to the clipboard without creating a file.
+- The selected Mini view is remembered through the existing settings file; no database, account,
+  telemetry or background process was added.
+
 ## 1.0.5 — 2026-09-09
 
 - Thermalyn checks the latest stable GitHub Release when it starts and quietly retries after the
