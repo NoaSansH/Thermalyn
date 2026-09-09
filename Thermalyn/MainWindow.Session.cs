@@ -44,13 +44,13 @@ public partial class MainWindow
         try
         {
             Clipboard.SetText(text);
-            CopyDiagnosticButton.Content = LocalizationService.Get("Session.Copied");
+            CopyDiagnosticButton.ToolTip = LocalizationService.Get("Session.Copied");
             await Task.Delay(1500);
-            if (!_isClosed) CopyDiagnosticButton.Content = LocalizationService.Get("Session.Copy");
+            if (!_isClosed) CopyDiagnosticButton.ToolTip = LocalizationService.Get("Session.Copy");
         }
         catch (Exception exception)
         {
-            MiniStatusText.Text = LocalizationService.Format("Session.CopyFailed", exception.Message);
+            SetStatus(LocalizationService.Format("Session.CopyFailed", exception.Message));
         }
     }
 

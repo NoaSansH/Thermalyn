@@ -25,6 +25,11 @@
                     <TextBlock Text="Thermalyn" FontSize="11.5" Foreground="{DynamicResource IconBrush}" Margin="8,0,0,0"/>
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button x:Name="CopyDiagnosticButton" Style="{StaticResource CaptionButton}" Click="CopyDiagnostic_Click"
+                            ToolTip="{DynamicResource Session.Copy}" AutomationProperties.Name="{DynamicResource Session.Copy}">
+                        <controls:Icon Data="{StaticResource IconCopy}" Width="16" Height="16"
+                                       Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.7"/>
+                    </Button>
                     <Button x:Name="UpdateButton" Style="{StaticResource CaptionButton}" Click="UpdateButton_Click"
                             ToolTip="{DynamicResource Update.Checking}" AutomationProperties.Name="{DynamicResource Update.Title}">
                         <Grid Width="18" Height="18">
@@ -225,8 +230,7 @@
                             <TextBlock x:Name="MiniSessionSince" Style="{StaticResource MetaText}" Margin="0,3,0,0"/>
                         </StackPanel>
                         <StackPanel x:Name="MiniActions" Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="{DynamicResource Session.Reset}" Style="{StaticResource PillButton}" Height="30" Margin="0,0,8,0" Click="ResetSession_Click"/>
-                            <Button x:Name="CopyDiagnosticButton" Content="{DynamicResource Session.Copy}" Style="{StaticResource PillButton}" Height="30" Click="CopyDiagnostic_Click"/>
+                            <Button Content="{DynamicResource Session.Reset}" Style="{StaticResource PillButton}" Height="30" Click="ResetSession_Click"/>
                         </StackPanel>
                     </Grid>
                     <UniformGrid x:Name="MiniCardsGrid" Columns="3" Margin="-8,0">
