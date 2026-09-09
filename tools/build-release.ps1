@@ -78,5 +78,8 @@ finally {
 
 $deliverables = @((Join-Path $output 'Thermalyn-Portable.exe'))
 if (-not $SkipInstaller) { $deliverables += (Join-Path $output 'Thermalyn-Setup.exe'), (Join-Path $output 'Thermalyn-Setup-Offline.exe') }
+$checksums = Get-FileHash -LiteralPath $deliverables -Algorithm SHA256 |
+    ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" }
+[IO.File]::WriteAllText((Join-Path $output 'SHA256SUMS.txt'), ($checksums -join "`n") + "`n", [Text.UTF8Encoding]::new($false))
 Get-Item $deliverables |
     Select-Object Name, @{ n = 'MB'; e = { [Math]::Round($_.Length / 1MB, 1) } }, LastWriteTime
