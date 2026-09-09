@@ -13,5 +13,6 @@
     <Geometry x:Key="IconGpu">M3,7 A2,2 0 0 1 5,5 H19 A2,2 0 0 1 21,7 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 Z M7,9 H13 V15 H7 Z M17,9 H17.01 M17,13 H17.01 M8,3 V5 M12,3 V5 M16,3 V5</Geometry>
     <Geometry x:Key="IconChevronDown">M6,9 L12,15 L18,9</Geometry>
     <Geometry x:Key="IconDownload">M12,3 V15 M7,10 L12,15 L17,10 M4,20 H20</Geometry>
+    <Geometry x:Key="IconCopy">M8,8 H19 A2,2 0 0 1 21,10 V19 A2,2 0 0 1 19,21 H10 A2,2 0 0 1 8,19 Z M16,8 V5 A2,2 0 0 0 14,3 H5 A2,2 0 0 0 3,5 V14 A2,2 0 0 0 5,16 H8</Geometry>
     <Geometry x:Key="IconActivity">M3,12 H7 L10,6 L14,18 L17,12 H21</Geometry>
 </ResourceDictionary>
