@@ -1,16 +1,23 @@
 [CmdletBinding()]
 param(
-    [string]$Root = (Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts\release'),
+    [string]$Root,
+    [string]$Version,
     [double]$PortableLimitMiB = 60,
     [double]$OnlineInstallerLimitMiB = 15,
     [double]$OfflineInstallerLimitMiB = 65
 )
 
 $ErrorActionPreference = 'Stop'
+if (-not $Root) { $Root = Join-Path (Split-Path -Parent $PSScriptRoot) 'artifacts\release' }
+if (-not $Version) {
+    $project = Get-Content (Join-Path (Split-Path -Parent $PSScriptRoot) 'Thermalyn\Thermalyn.csproj') -Raw
+    $Version = [regex]::Match($project, '<Version>([^<]+)</Version>').Groups[1].Value
+}
 $limits = [ordered]@{
-    'Thermalyn-Portable.exe' = $PortableLimitMiB
+    "Thermalyn-Portable-$Version.exe" = $PortableLimitMiB
     'Thermalyn-Setup.exe' = $OnlineInstallerLimitMiB
-    'Thermalyn-Setup-Offline.exe' = $OfflineInstallerLimitMiB
+    "Thermalyn-Setup-$Version.exe" = $OnlineInstallerLimitMiB
+    "Thermalyn-Setup-Offline-$Version.exe" = $OfflineInstallerLimitMiB
 }
 
 $results = foreach ($entry in $limits.GetEnumerator()) {

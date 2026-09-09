@@ -34,7 +34,7 @@ try {
         /p:Version=$Version `
         -o (Join-Path $artifacts 'Thermalyn-win-x64') --nologo
     if ($LASTEXITCODE) { throw 'portable publish failed' }
-    Copy-Item (Join-Path $artifacts 'Thermalyn-win-x64\Thermalyn.exe') (Join-Path $output 'Thermalyn-Portable.exe') -Force
+    Copy-Item (Join-Path $artifacts 'Thermalyn-win-x64\Thermalyn.exe') (Join-Path $output "Thermalyn-Portable-$Version.exe") -Force
 
     if ($SkipInstaller) { return }
 
@@ -61,11 +61,12 @@ try {
     & $iscc "/DAppVersion=$Version" (Join-Path $root 'installer\Thermalyn.iss') "/O$stage" | Select-Object -Last 3
     if ($LASTEXITCODE) { throw 'online installer compilation failed' }
     Copy-Item (Join-Path $stage 'Thermalyn-Setup.exe') (Join-Path $output 'Thermalyn-Setup.exe') -Force
+    Copy-Item (Join-Path $stage 'Thermalyn-Setup.exe') (Join-Path $output "Thermalyn-Setup-$Version.exe") -Force
 
     Write-Host '==> offline installer'
     & $iscc '/DOfflineBuild=1' "/DAppVersion=$Version" (Join-Path $root 'installer\Thermalyn.iss') "/O$stage" | Select-Object -Last 3
     if ($LASTEXITCODE) { throw 'offline installer compilation failed' }
-    Copy-Item (Join-Path $stage 'Thermalyn-Setup-Offline.exe') (Join-Path $output 'Thermalyn-Setup-Offline.exe') -Force
+    Copy-Item (Join-Path $stage 'Thermalyn-Setup-Offline.exe') (Join-Path $output "Thermalyn-Setup-Offline-$Version.exe") -Force
 }
 finally {
     foreach ($lock in $lockContents.Keys) { Set-Content -LiteralPath $lock -Value $lockContents[$lock] -NoNewline }
@@ -76,8 +77,12 @@ finally {
     }
 }
 
-$deliverables = @((Join-Path $output 'Thermalyn-Portable.exe'))
-if (-not $SkipInstaller) { $deliverables += (Join-Path $output 'Thermalyn-Setup.exe'), (Join-Path $output 'Thermalyn-Setup-Offline.exe') }
+$deliverables = @((Join-Path $output "Thermalyn-Portable-$Version.exe"))
+if (-not $SkipInstaller) {
+    $deliverables += (Join-Path $output 'Thermalyn-Setup.exe'),
+        (Join-Path $output "Thermalyn-Setup-$Version.exe"),
+        (Join-Path $output "Thermalyn-Setup-Offline-$Version.exe")
+}
 $checksums = Get-FileHash -LiteralPath $deliverables -Algorithm SHA256 |
     ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" }
 [IO.File]::WriteAllText((Join-Path $output 'SHA256SUMS.txt'), ($checksums -join "`n") + "`n", [Text.UTF8Encoding]::new($false))

@@ -54,9 +54,9 @@ Download the current release and run it.
 
 | File | What it does |
 | --- | --- |
-| **`Thermalyn-Setup.exe`** | **Recommended.** Installs the application, adds shortcuts and an uninstaller, and sets up the sensor driver. Downloads the .NET runtime if the machine lacks it. |
-| `Thermalyn-Portable.exe` | No installation. One file, run it from anywhere, a USB stick included. |
-| `Thermalyn-Setup-Offline.exe` | The same installer with the .NET runtime included, for a machine with no internet connection. |
+| **`Thermalyn-Setup-<version>.exe`** | **Recommended.** Installs the application, adds shortcuts and an uninstaller, and sets up the sensor driver. Downloads the .NET runtime if the machine lacks it. |
+| `Thermalyn-Portable-<version>.exe` | No installation. One file, run it from anywhere, a USB stick included. |
+| `Thermalyn-Setup-Offline-<version>.exe` | The same installer with the .NET runtime included, for a machine with no internet connection. |
 
 Or, once the package managers have accepted the submissions in
 [`packaging/`](packaging/README.md):
@@ -73,7 +73,7 @@ arrived intact. Every executable also carries a signed build provenance attestat
 came from this repository's workflow at that tag and was not touched afterwards:
 
 ```powershell
-gh attestation verify Thermalyn-Setup.exe --repo NoaSansH/Thermalyn
+gh attestation verify Thermalyn-Setup-1.1.0.exe --repo NoaSansH/Thermalyn
 ```
 
 Windows shows a reputation warning the first time, because the executable is not code-signed:
@@ -150,7 +150,8 @@ git push origin main
 git push origin v1.1.1
 ```
 
-The Release workflow tests and builds the project, creates `Thermalyn-Setup.exe`, writes
+The Release workflow tests and builds the project, creates versioned download names plus the
+`Thermalyn-Setup.exe` updater alias, writes
 `SHA256SUMS.txt`, attests the executables and publishes a GitHub Release. The updater ignores normal
 pushes, drafts and prereleases; it detects the new version only after this stable Release exists.
 
