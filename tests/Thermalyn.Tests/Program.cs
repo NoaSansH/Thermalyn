@@ -10,7 +10,25 @@ using Thermalyn.Models;
 using Thermalyn.Services;
 
 if (args.Contains("--layout")) { LayoutChecks.Run(); return; }
+if (args.Contains("--live-update")) { await UpdateServiceChecks.RunLiveAsync(); return; }
 MonitoringChecks.Run();
+
+if (!UpdateService.TryParseVersion("v1.2.3", out var updateVersion) || updateVersion != new Version(1, 2, 3))
+    throw new InvalidOperationException("The updater did not parse a valid GitHub release tag.");
+if (UpdateService.TryParseVersion("nightly", out _))
+    throw new InvalidOperationException("The updater accepted a non-version release tag.");
+var sampleHash = new string('a', 64);
+if (UpdateService.ParseExpectedHash($"{sampleHash}  Thermalyn-Setup.exe\n", UpdateService.InstallerAssetName) != sampleHash)
+    throw new InvalidOperationException("The updater did not parse SHA256SUMS.txt.");
+if (!UpdateService.IsTrustedReleaseAssetUri(
+        new Uri("https://github.com/NoaSansH/Thermalyn/releases/download/v1.2.3/Thermalyn-Setup.exe"),
+        UpdateService.InstallerAssetName) ||
+    UpdateService.IsTrustedReleaseAssetUri(
+        new Uri("https://example.com/NoaSansH/Thermalyn/releases/download/v1.2.3/Thermalyn-Setup.exe"),
+        UpdateService.InstallerAssetName))
+    throw new InvalidOperationException("The updater did not enforce the trusted GitHub asset origin.");
+Console.WriteLine("Update version, checksum and origin checks passed.");
+await UpdateServiceChecks.RunAsync();
 
 static SensorSample S(string name, SensorType type, double value) => new(name, type, value);
 static void Equal(string test, double expected, SensorSample? actual)
@@ -244,6 +262,16 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
         if (privatePathPattern.IsMatch(text))
             throw new InvalidOperationException($"Private absolute user path found in tracked source: {relative}");
 
+        // A stray control character makes a workflow file unparseable, and GitHub is the only
+        // thing that says so.
+        for (var index = 0; index < text.Length; index++)
+        {
+            var character = text[index];
+            if (!char.IsControl(character) || character is '\r' or '\n' or '\t') continue;
+            throw new InvalidOperationException(
+                $"{relative} contains the control character U+{(int)character:X4} at offset {index}.");
+        }
+
         if (Path.GetFileName(file).Equals("packages.lock.json", StringComparison.OrdinalIgnoreCase) &&
             text.Contains("win-x64", StringComparison.OrdinalIgnoreCase))
             throw new InvalidOperationException(
@@ -268,6 +296,13 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
                     $"Hardcoded caption in {relative} -> \"{caption.Value.Trim()}\". Read it from the string tables instead.");
         }
     }
+
+    // The release workflow reads the section for the version being tagged and fails without it.
+    var projectFile = File.ReadAllText(Path.Combine(repository, "Thermalyn", "Thermalyn.csproj"));
+    var declared = Regex.Match(projectFile, "<Version>([^<]+)</Version>").Groups[1].Value;
+    if (declared.Length == 0) throw new InvalidOperationException("Thermalyn.csproj declares no <Version>.");
+    if (!File.ReadAllText(Path.Combine(repository, "CHANGELOG.md")).Contains($"## {declared} ", StringComparison.Ordinal))
+        throw new InvalidOperationException($"CHANGELOG.md has no section for version {declared}.");
 
     Console.WriteLine($"Repository contracts: {english.Count} bilingual strings, UI, installer, manifest, privacy, caption and language checks passed.");
 }

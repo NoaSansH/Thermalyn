@@ -76,12 +76,13 @@ jobs:
           $release = 'artifacts/release'
           $version = '${{ steps.version.outputs.version }}'
           $lines = Get-Content CHANGELOG.md -Encoding utf8
-          $heading = $lines | Select-String -Pattern ('^## ' + [regex]::Escape($version) + '') | Select-Object -First 1
-          if (-not $heading) { throw "CHANGELOG.md has no section for $version." }
-          $rest = $lines[$heading.LineNumber..($lines.Count - 1)]
-          $next = $rest | Select-String -Pattern '^## ' | Select-Object -First 1
-          $body = if ($next) { $rest[0..($next.LineNumber - 2)] } else { $rest }
-          "## What changed`n" + (($body -join "`n").Trim()) + "`n" | Set-Content -Encoding utf8 release-notes.md
+          $start = -1
+          for ($i = 0; $i -lt $lines.Count; $i++) { if ($lines[$i] -like "## $version *") { $start = $i; break } }
+          if ($start -lt 0) { throw "CHANGELOG.md has no section for $version." }
+          $end = $lines.Count
+          for ($i = $start + 1; $i -lt $lines.Count; $i++) { if ($lines[$i] -like '## *') { $end = $i; break } }
+          $body = ($lines[($start + 1)..($end - 1)] -join "`n").Trim()
+          "## What changed`n$body`n" | Set-Content -Encoding utf8 release-notes.md
           @'
           ## Which file do I download?
 

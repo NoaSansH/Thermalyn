@@ -12,4 +12,5 @@
     <Geometry x:Key="IconHardDrive">M3,6 A2,2 0 0 1 5,4 H19 A2,2 0 0 1 21,6 V18 A2,2 0 0 1 19,20 H5 A2,2 0 0 1 3,18 Z M3,15 H21 M7,17.5 H7.01 M11,17.5 H11.01</Geometry>
     <Geometry x:Key="IconGpu">M3,7 A2,2 0 0 1 5,5 H19 A2,2 0 0 1 21,7 V17 A2,2 0 0 1 19,19 H5 A2,2 0 0 1 3,17 Z M7,9 H13 V15 H7 Z M17,9 H17.01 M17,13 H17.01 M8,3 V5 M12,3 V5 M16,3 V5</Geometry>
     <Geometry x:Key="IconChevronDown">M6,9 L12,15 L18,9</Geometry>
+    <Geometry x:Key="IconDownload">M12,3 V15 M7,10 L12,15 L17,10 M4,20 H20</Geometry>
 </ResourceDictionary>

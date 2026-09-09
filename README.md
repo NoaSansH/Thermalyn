@@ -77,6 +77,17 @@ gh attestation verify Thermalyn-Setup.exe --repo NoaSansH/Thermalyn
 Windows shows a reputation warning the first time, because the executable is not code-signed:
 choose **More info**, then **Run anyway**. Only a paid certificate removes that screen.
 
+### Automatic updates
+
+Thermalyn checks the latest stable GitHub Release when it starts. If the computer is offline, it
+waits for the network to return and retries after a short delay. The title-bar button shows a badge
+only when a newer version exists. Downloads stay in the background; the installer size and SHA-256
+checksum are verified before the **Restart and install** action becomes available. Thermalyn never
+starts an installation or restarts without that explicit action.
+
+The updater always uses `Thermalyn-Setup.exe`. This also gives portable users the normal installed
+experience on their first automatic update (shortcuts, uninstaller and startup registration).
+
 ### Administrator rights
 
 Processor temperature and power draw are not published by Windows. They require reading the
@@ -122,6 +133,24 @@ git clone https://github.com/NoaSansH/Thermalyn.git
 cd Thermalyn
 dotnet run --project .\Thermalyn\Thermalyn.csproj
 ```
+
+### Publish a version detected by the updater
+
+1. Choose a three-part version such as `1.0.6` and add a matching `## 1.0.6` section to
+   `CHANGELOG.md`.
+2. Set that same version in `Thermalyn/Thermalyn.csproj`, `installer/Thermalyn.iss` and the default
+   value in `tools/build-release.ps1`.
+3. Commit and push those changes, then create and push the matching tag:
+
+```powershell
+git tag -a v1.0.6 -m "Thermalyn 1.0.6"
+git push origin main
+git push origin v1.0.6
+```
+
+The Release workflow tests and builds the project, creates `Thermalyn-Setup.exe`, writes
+`SHA256SUMS.txt`, attests the executables and publishes a GitHub Release. The updater ignores normal
+pushes, drafts and prereleases; it detects the new version only after this stable Release exists.
 
 Run the checks:
 
