@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+  CI: true
+
+jobs:
+  build-and-test:
+    name: Build and deterministic tests
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.416
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore locked dependencies and audit vulnerabilities
+        shell: pwsh
+        run: >-
+          dotnet restore tests/Thermalyn.Tests/Thermalyn.Tests.csproj
+          --locked-mode
+          -p:NuGetAudit=true
+          -p:NuGetAuditMode=all
+          -p:TreatWarningsAsErrors=true
+      - name: Verify C# formatting
+        shell: pwsh
+        run: |
+          dotnet format Thermalyn/Thermalyn.csproj --verify-no-changes --no-restore --verbosity minimal
+          dotnet format tests/Thermalyn.Tests/Thermalyn.Tests.csproj --verify-no-changes --no-restore --verbosity minimal
+      - name: Build with warnings as errors
+        run: dotnet build tests/Thermalyn.Tests/Thermalyn.Tests.csproj -c Release --no-restore -warnaserror
+      - name: Sensor selection, settings, localization and UI contracts
+        run: dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --settings --repository-contracts
+      - name: Windows Startup Apps registration contract
+        run: dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --startup-registration
+
+  package:
+    name: Package and validate executables
+    needs: build-and-test
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.416
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Restore locked dependencies
+        run: dotnet restore Thermalyn/Thermalyn.csproj --locked-mode
+      - name: Install Inno Setup
+        run: choco install innosetup --no-progress --yes
+      - name: Build all release formats
+        shell: pwsh
+        run: ./tools/build-release.ps1 -Version 0.0.0-ci.${{ github.run_number }}
+      - name: Verify PE files, size budgets and hashes
+        shell: pwsh
+        run: ./tools/verify-release.ps1
+      - name: Upload unsigned CI executables
+        uses: actions/upload-artifact@v7
+        with:
+          name: Thermalyn-unsigned-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            artifacts/release/Thermalyn-Setup.exe
+            artifacts/release/Thermalyn-Portable.exe
+            artifacts/release/Thermalyn-Setup-Offline.exe
