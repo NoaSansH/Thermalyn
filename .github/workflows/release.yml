@@ -55,21 +55,17 @@ jobs:
         shell: pwsh
         run: |
           ./tools/build-release.ps1 -Version '${{ steps.version.outputs.version }}'
-          ./tools/verify-release.ps1
+          ./tools/verify-release.ps1 -Version '${{ steps.version.outputs.version }}'
           $release = 'artifacts/release'
-          # sha256sum reads the file name up to the newline. A carriage return joins the name
-          # and every entry fails to verify.
-          $lines = Get-FileHash "$release/Thermalyn-Setup.exe","$release/Thermalyn-Portable.exe","$release/Thermalyn-Setup-Offline.exe" -Algorithm SHA256 |
-            ForEach-Object { "$($_.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_.Path))" }
-          [IO.File]::WriteAllText("$release/SHA256SUMS.txt", ($lines -join "`n") + "`n", [Text.UTF8Encoding]::new($false))
           Copy-Item LICENSE "$release/LICENSE.txt"
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             artifacts/release/Thermalyn-Setup.exe
-            artifacts/release/Thermalyn-Portable.exe
-            artifacts/release/Thermalyn-Setup-Offline.exe
+            artifacts/release/Thermalyn-Setup-${{ steps.version.outputs.version }}.exe
+            artifacts/release/Thermalyn-Portable-${{ steps.version.outputs.version }}.exe
+            artifacts/release/Thermalyn-Setup-Offline-${{ steps.version.outputs.version }}.exe
       - name: Write the release notes
         shell: pwsh
         run: |
@@ -83,14 +79,14 @@ jobs:
           for ($i = $start + 1; $i -lt $lines.Count; $i++) { if ($lines[$i] -like '## *') { $end = $i; break } }
           $body = ($lines[($start + 1)..($end - 1)] -join "`n").Trim()
           "## What changed`n$body`n" | Set-Content -Encoding utf8 release-notes.md
-          @'
+          @"
           ## Which file do I download?
 
           | | |
           | --- | --- |
-          | **Thermalyn-Setup.exe** | **Start here.** Installs Thermalyn, adds a Start menu entry and an uninstaller, and sets up the sensor driver. Downloads the .NET runtime if your machine does not have it. |
-          | **Thermalyn-Portable.exe** | No installation at all. A single file: put it where you like, a USB stick included, and run it. |
-          | **Thermalyn-Setup-Offline.exe** | The same installer, with the .NET runtime already inside. For a machine with no internet connection. |
+          | **Thermalyn-Setup-$version.exe** | **Start here.** Installs Thermalyn, adds a Start menu entry and an uninstaller, and sets up the sensor driver. Downloads the .NET runtime if your machine does not have it. |
+          | **Thermalyn-Portable-$version.exe** | No installation at all. A single file: put it where you like, a USB stick included, and run it. |
+          | **Thermalyn-Setup-Offline-$version.exe** | The same installer, with the .NET runtime already inside. For a machine with no internet connection. |
 
           You only need one of the three.
 
@@ -107,12 +103,12 @@ jobs:
           GitHub CLI:
 
           ```
-          gh attestation verify Thermalyn-Setup.exe --repo NoaSansH/Thermalyn
+          gh attestation verify Thermalyn-Setup-$version.exe --repo NoaSansH/Thermalyn
           ```
 
           You can also look each file up on VirusTotal by its checksum:
 
-          '@ | Add-Content -Encoding utf8 release-notes.md
+          "@ | Add-Content -Encoding utf8 release-notes.md
 
           Get-Content "$release/SHA256SUMS.txt" | ForEach-Object {
             $hash, $name = $_ -split '\s+', 2
@@ -134,8 +130,9 @@ jobs:
         run: >-
           gh release create '${{ steps.version.outputs.tag }}'
           artifacts/release/Thermalyn-Setup.exe
-          artifacts/release/Thermalyn-Portable.exe
-          artifacts/release/Thermalyn-Setup-Offline.exe
+          artifacts/release/Thermalyn-Setup-${{ steps.version.outputs.version }}.exe
+          artifacts/release/Thermalyn-Portable-${{ steps.version.outputs.version }}.exe
+          artifacts/release/Thermalyn-Setup-Offline-${{ steps.version.outputs.version }}.exe
           artifacts/release/SHA256SUMS.txt
           artifacts/release/LICENSE.txt
           --verify-tag
