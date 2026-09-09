@@ -9,6 +9,10 @@ namespace Thermalyn;
 
 public partial class MainWindow
 {
+    private const int DwmWindowCornerPreference = 33;
+    private const int DwmCornerDoNotRound = 1;
+    private const int DwmCornerRound = 2;
+
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
@@ -28,6 +32,7 @@ public partial class MainWindow
     {
         _windowSource = HwndSource.FromHwnd(new WindowInteropHelper(this).Handle);
         _windowSource?.AddHook(WindowMessageHook);
+        UpdateWindowCorners();
         UpdateCaptionGlyph();
     }
 
@@ -95,10 +100,19 @@ public partial class MainWindow
     {
         if (!IsInitialized) return;
         var maximized = WindowState == WindowState.Maximized;
+        UpdateWindowCorners();
         MaximizeGlyph.Visibility = maximized ? Visibility.Collapsed : Visibility.Visible;
         RestoreGlyph.Visibility = maximized ? Visibility.Visible : Visibility.Collapsed;
         MaximizeCaptionButton.ToolTip = LocalizationService.Get(maximized ? "Window.Restore" : "Window.Maximize");
         MinimizeCaptionButton.ToolTip = LocalizationService.Get("Window.Minimize");
         CloseCaptionButton.ToolTip = LocalizationService.Get("Window.Close");
+    }
+
+    private void UpdateWindowCorners()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero) return;
+        var preference = WindowState == WindowState.Maximized ? DwmCornerDoNotRound : DwmCornerRound;
+        _ = DwmSetWindowAttribute(hwnd, DwmWindowCornerPreference, ref preference, sizeof(int));
     }
 }

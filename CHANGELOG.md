@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1 — 2026-09-09
+
+- Copy diagnostics is now always available beside Settings and confirms when the text reaches the
+  clipboard.
+- Sensor startup no longer waits for the slow memory SPD scan; RAM usage still comes from Windows.
+- Removing the optional PawnIO driver during uninstall now uses its supported silent command.
+
 ## 1.1.0 — 2026-09-09
 
 - A new Mini view keeps processor, graphics and memory readable in a small window.

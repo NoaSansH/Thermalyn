@@ -6,7 +6,7 @@
         WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
         Background="{DynamicResource CanvasBrush}" UseLayoutRounding="True" SnapsToDevicePixels="True">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="34" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+        <WindowChrome CaptionHeight="34" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="8" UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
 
     <Grid x:Name="RootLayout" Background="{DynamicResource CanvasBrush}">
