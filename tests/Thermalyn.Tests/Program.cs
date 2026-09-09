@@ -215,6 +215,7 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
         @"DelTree(Root + '\AppData\Local\Temp\.net\{#AppName}'",
         "DelTree(ExpandConstant('{app}')",
         "/delete /f /tn \"\"{#AppName}\"\"",
+        "Arguments + ' -silent'",
         "StartupApproved\\Run"
     })
     {

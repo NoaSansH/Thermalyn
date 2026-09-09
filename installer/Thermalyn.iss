@@ -294,7 +294,7 @@ begin
     Executable := Command;
     Arguments := '';
   end;
-  Exec(Executable, Trim(Arguments + ' /S'), '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec(Executable, Trim(Arguments + ' -silent'), '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
