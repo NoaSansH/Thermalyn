@@ -11,7 +11,6 @@ public sealed class HardwareMonitorService : IDisposable
 {
     private Computer _computer = CreateComputer();
 
-    // SPD discovery is synchronous and can take tens of seconds. Memory opens last.
     private static Computer CreateComputer() => new()
     {
         IsCpuEnabled = true,
@@ -25,9 +24,8 @@ public sealed class HardwareMonitorService : IDisposable
     };
     private bool _opened;
     private int _stage;
-    private Task? _memoryOpenTask;
 
-    public bool IsFullyOpen => Volatile.Read(ref _stage) >= 3;
+    public bool IsFullyOpen => Volatile.Read(ref _stage) >= 2;
 
     private static readonly TimeSpan InventoryLifetime = TimeSpan.FromMinutes(2);
     private DateTime _inventoryStamp = DateTime.MinValue;
@@ -70,7 +68,6 @@ public sealed class HardwareMonitorService : IDisposable
                 Trace($"GPU group opened in {watch.ElapsedMilliseconds} ms");
                 return;
             case 1:
-                _stage = 2;
                 try
                 {
                     _computer.IsMotherboardEnabled = true;
@@ -79,21 +76,8 @@ public sealed class HardwareMonitorService : IDisposable
                     _computer.IsPsuEnabled = true;
                 }
                 catch { }
+                Volatile.Write(ref _stage, 2);
                 Trace($"Motherboard, storage and cooling groups opened in {watch.ElapsedMilliseconds} ms");
-                return;
-            case 2:
-                var computer = _computer;
-                _memoryOpenTask ??= Task.Run(() =>
-                {
-                    var memoryWatch = Stopwatch.StartNew();
-                    try { computer.IsMemoryEnabled = true; }
-                    catch { }
-                    finally
-                    {
-                        Volatile.Write(ref _stage, 3);
-                        Trace($"Memory and SPD groups opened in {memoryWatch.ElapsedMilliseconds} ms");
-                    }
-                });
                 return;
         }
     }
@@ -283,17 +267,13 @@ public sealed class HardwareMonitorService : IDisposable
     public void Restart()
     {
         var oldComputer = _computer;
-        var oldMemoryTask = _memoryOpenTask;
         try
         {
-            if (_opened && oldMemoryTask is { IsCompleted: false })
-                _ = oldMemoryTask.ContinueWith(_ => { try { oldComputer.Close(); } catch { } }, TaskScheduler.Default);
-            else if (_opened) oldComputer.Close();
+            if (_opened) oldComputer.Close();
         }
         catch { }
         _opened = false;
         _stage = 0;
-        _memoryOpenTask = null;
         _computer = CreateComputer();
     }
 
@@ -605,15 +585,7 @@ public sealed class HardwareMonitorService : IDisposable
     {
         try
         {
-            if (_opened && _memoryOpenTask is { IsCompleted: false } opening)
-            {
-                // The MemoryGroup constructor cannot be cancelled; closing during it would race.
-                _ = opening.ContinueWith(_ =>
-                {
-                    try { _computer.Close(); } catch { }
-                }, TaskScheduler.Default);
-            }
-            else if (_opened) _computer.Close();
+            if (_opened) _computer.Close();
         }
         catch { }
         _opened = false;

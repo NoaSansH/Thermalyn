@@ -351,7 +351,7 @@ if (args.Contains("--startup-registration", StringComparer.OrdinalIgnoreCase))
 
 if (args.Contains("--probe", StringComparer.OrdinalIgnoreCase))
 {
-    var computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true, IsMemoryEnabled = true };
+    var computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true, IsMemoryEnabled = false };
     try
     {
         computer.Open();
