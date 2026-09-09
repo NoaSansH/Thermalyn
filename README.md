@@ -73,7 +73,7 @@ arrived intact. Every executable also carries a signed build provenance attestat
 came from this repository's workflow at that tag and was not touched afterwards:
 
 ```powershell
-gh attestation verify Thermalyn-Setup-1.1.0.exe --repo NoaSansH/Thermalyn
+gh attestation verify Thermalyn-Setup-1.1.1.exe --repo NoaSansH/Thermalyn
 ```
 
 Windows shows a reputation warning the first time, because the executable is not code-signed:
