@@ -44,9 +44,11 @@ public partial class MainWindow
         try
         {
             Clipboard.SetText(text);
-            CopyDiagnosticButton.ToolTip = LocalizationService.Get("Session.Copied");
+            DiagnosticCopiedPopup.IsOpen = false;
+            DiagnosticCopiedPopup.PlacementTarget = sender as UIElement;
+            DiagnosticCopiedPopup.IsOpen = true;
             await Task.Delay(1500);
-            if (!_isClosed) CopyDiagnosticButton.ToolTip = LocalizationService.Get("Session.Copy");
+            if (!_isClosed) DiagnosticCopiedPopup.IsOpen = false;
         }
         catch (Exception exception)
         {

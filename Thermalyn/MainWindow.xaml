@@ -25,11 +25,6 @@
                     <TextBlock Text="Thermalyn" FontSize="11.5" Foreground="{DynamicResource IconBrush}" Margin="8,0,0,0"/>
                 </StackPanel>
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                    <Button x:Name="CopyDiagnosticButton" Style="{StaticResource CaptionButton}" Click="CopyDiagnostic_Click"
-                            ToolTip="{DynamicResource Session.Copy}" AutomationProperties.Name="{DynamicResource Session.Copy}">
-                        <controls:Icon Data="{StaticResource IconCopy}" Width="16" Height="16"
-                                       Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.7"/>
-                    </Button>
                     <Button x:Name="UpdateButton" Style="{StaticResource CaptionButton}" Click="UpdateButton_Click"
                             ToolTip="{DynamicResource Update.Checking}" AutomationProperties.Name="{DynamicResource Update.Title}">
                         <Grid Width="18" Height="18">
@@ -93,6 +88,14 @@
             </Border>
         </Popup>
 
+        <Popup x:Name="DiagnosticCopiedPopup" Placement="Bottom" VerticalOffset="6" StaysOpen="False" AllowsTransparency="True">
+            <Border Padding="11,7" CornerRadius="6" Background="{DynamicResource Surface1Brush}"
+                    BorderBrush="{DynamicResource BorderStrongBrush}" BorderThickness="1">
+                <Border.Effect><DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.24"/></Border.Effect>
+                <TextBlock Text="{DynamicResource Session.Copied}" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="11.5"/>
+            </Border>
+        </Popup>
+
         <Border x:Name="NavigationBar" Grid.Row="1" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,0,0,1" Padding="32,0">
             <Grid>
                 <StackPanel Orientation="Horizontal">
@@ -101,9 +104,10 @@
                     <Button x:Name="BalancedButton" Content="{DynamicResource Nav.Balanced}" Style="{StaticResource NavButton}" Click="Balanced_Click"/>
                     <Button x:Name="DetailedButton" Content="{DynamicResource Nav.Detailed}" Style="{StaticResource NavButton}" Click="Detailed_Click"/>
                 </StackPanel>
-                <Button HorizontalAlignment="Right" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}">
-                    <controls:Icon Data="{StaticResource IconSettings}" Width="15" Height="15" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8"/>
-                </Button>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Style="{StaticResource IconButton}" Click="CopyDiagnostic_Click" ToolTip="{DynamicResource Session.Copy}" AutomationProperties.Name="{DynamicResource Session.Copy}"><controls:Icon Data="{StaticResource IconCopy}" Width="15" Height="15" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8"/></Button>
+                    <Button Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="15" Height="15" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.8"/></Button>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -493,12 +497,13 @@
         </Grid>
 
         <Border x:Name="BottomNavigation" Grid.Row="4" Visibility="Collapsed" Background="{DynamicResource CanvasBrush}" BorderBrush="{DynamicResource BorderSubtleBrush}" BorderThickness="0,1,0,0" Padding="4">
-            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
                 <Button x:Name="MiniNavIcon" Grid.Column="0" Style="{StaticResource IconButton}" Click="Mini_Click" ToolTip="{DynamicResource Nav.Mini}"><controls:Icon Data="{StaticResource IconActivity}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
                 <Button x:Name="CompactNavIcon" Grid.Column="1" Style="{StaticResource IconButton}" Click="Compact_Click" ToolTip="{DynamicResource Nav.Compact}"><controls:Icon Data="{StaticResource IconGauge}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
                 <Button x:Name="BalancedNavIcon" Grid.Column="2" Style="{StaticResource IconButton}" Click="Balanced_Click" ToolTip="{DynamicResource Nav.Balanced}"><controls:Icon Data="{StaticResource IconLayoutDashboard}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
                 <Button x:Name="DetailedNavIcon" Grid.Column="3" Style="{StaticResource IconButton}" Click="Detailed_Click" ToolTip="{DynamicResource Nav.Detailed}"><controls:Icon Data="{StaticResource IconChart}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
-                <Button Grid.Column="4" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button Grid.Column="4" Style="{StaticResource IconButton}" Click="CopyDiagnostic_Click" ToolTip="{DynamicResource Session.Copy}" AutomationProperties.Name="{DynamicResource Session.Copy}"><controls:Icon Data="{StaticResource IconCopy}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
+                <Button Grid.Column="5" Style="{StaticResource IconButton}" Click="Settings_Click" ToolTip="{DynamicResource Nav.Settings}"><controls:Icon Data="{StaticResource IconSettings}" Width="18" Height="18" StrokeThickness="1.8" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
             </Grid>
         </Border>
     </Grid>
