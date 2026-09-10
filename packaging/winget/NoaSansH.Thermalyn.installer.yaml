@@ -1,5 +1,5 @@
 PackageIdentifier: NoaSansH.Thermalyn
-PackageVersion: 1.0.3
+PackageVersion: 1.1.1
 InstallerType: inno
 Scope: machine
 InstallModes:
@@ -11,10 +11,10 @@ InstallerSwitches:
   SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART
 UpgradeBehavior: install
 ProductCode: '{8F2C1D74-4E63-4A18-9E2B-5C7A0D3F1B96}_is1'
-ReleaseDate: 2026-09-08
+ReleaseDate: 2026-09-09
 Installers:
 - Architecture: x64
-  InstallerUrl: https://github.com/NoaSansH/Thermalyn/releases/download/v1.0.3/Thermalyn-Setup.exe
-  InstallerSha256: 03D3E2330051C959381FE57FCEB0037F0CFC840C431FC05178E2DBF18CF42DE4
+  InstallerUrl: https://github.com/NoaSansH/Thermalyn/releases/download/v1.1.1/Thermalyn-Setup-1.1.1.exe
+  InstallerSha256: E9CEFD20AA4E71F577278698D9289B7F381FDA9778DB98171F7240FC94B37E6E
 ManifestType: installer
 ManifestVersion: 1.6.0

@@ -1,12 +1,12 @@
 {
-    "version": "1.0.3",
+    "version": "1.1.1",
     "description": "Hardware monitor for Windows 11: processor, graphics, memory and drive sensors.",
     "homepage": "https://github.com/NoaSansH/Thermalyn",
     "license": "GPL-3.0-or-later",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v1.0.3/Thermalyn-Portable.exe#/Thermalyn.exe",
-            "hash": "33c49cd0f5a08be9f98abf6c43571c80d4bc524cfe13e3980483753a8b599495"
+            "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v1.1.1/Thermalyn-Portable-1.1.1.exe#/Thermalyn.exe",
+            "hash": "b779701e72ca24c72694dd7cfeb70c2f061a13c88c5b586a65c7b93a50848f85"
         }
     },
     "bin": "Thermalyn.exe",
@@ -26,7 +26,7 @@
     "autoupdate": {
         "architecture": {
             "64bit": {
-                "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v$version/Thermalyn-Portable.exe#/Thermalyn.exe"
+                "url": "https://github.com/NoaSansH/Thermalyn/releases/download/v$version/Thermalyn-Portable-$version.exe#/Thermalyn.exe"
             }
         }
     }

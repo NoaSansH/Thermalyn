@@ -1,5 +1,5 @@
 PackageIdentifier: NoaSansH.Thermalyn
-PackageVersion: 1.0.3
+PackageVersion: 1.1.1
 PackageLocale: en-US
 Publisher: Thermalyn Project
 PublisherUrl: https://github.com/NoaSansH
@@ -28,6 +28,6 @@ Tags:
 - gpu
 - sensors
 - system-monitor
-ReleaseNotesUrl: https://github.com/NoaSansH/Thermalyn/releases/tag/v1.0.3
+ReleaseNotesUrl: https://github.com/NoaSansH/Thermalyn/releases/tag/v1.1.1
 ManifestType: defaultLocale
 ManifestVersion: 1.6.0
