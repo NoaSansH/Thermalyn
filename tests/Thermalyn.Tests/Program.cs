@@ -173,20 +173,39 @@ if (args.Contains("--settings", StringComparer.OrdinalIgnoreCase))
 if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
 {
     var repository = FindRepositoryRoot();
-    var english = ReadResourceKeys(Path.Combine(repository, "Thermalyn", "Themes", "Strings.en.xaml"));
-    var french = ReadResourceKeys(Path.Combine(repository, "Thermalyn", "Themes", "Strings.fr.xaml"));
+    var themes = Path.Combine(repository, "Thermalyn", "Themes");
+    var english = ReadResourceKeys(Path.Combine(themes, "Strings.en.xaml"));
+    var french = ReadResourceKeys(Path.Combine(themes, "Strings.fr.xaml"));
 
-    var missingFrench = english.Keys.Except(french.Keys, StringComparer.Ordinal).OrderBy(key => key).ToArray();
-    var missingEnglish = french.Keys.Except(english.Keys, StringComparer.Ordinal).OrderBy(key => key).ToArray();
-    if (missingFrench.Length > 0 || missingEnglish.Length > 0)
-        throw new InvalidOperationException($"Localization key mismatch. Missing in French: {string.Join(", ", missingFrench)}; missing in English: {string.Join(", ", missingEnglish)}");
+    var tables = Directory.GetFiles(themes, "Strings.*.xaml")
+        .ToDictionary(path => Path.GetFileNameWithoutExtension(path).Split('.')[^1], StringComparer.Ordinal);
 
-    foreach (var key in english.Keys)
+    var offered = LocalizationService.Available.OrderBy(code => code, StringComparer.Ordinal).ToArray();
+    var present = tables.Keys.OrderBy(code => code, StringComparer.Ordinal).ToArray();
+    if (!offered.SequenceEqual(present, StringComparer.Ordinal))
+        throw new InvalidOperationException(
+            $"LocalizationService offers [{string.Join(", ", offered)}] but Themes holds [{string.Join(", ", present)}].");
+
+    foreach (var (code, path) in tables.OrderBy(entry => entry.Key, StringComparer.Ordinal))
     {
-        var englishPlaceholders = PlaceholderSet(english[key]);
-        var frenchPlaceholders = PlaceholderSet(french[key]);
-        if (!englishPlaceholders.SetEquals(frenchPlaceholders))
-            throw new InvalidOperationException($"Localization placeholder mismatch for '{key}'.");
+        if (code.Equals("en", StringComparison.Ordinal)) continue;
+        var translated = ReadResourceKeys(path);
+
+        var missing = english.Keys.Except(translated.Keys, StringComparer.Ordinal).OrderBy(key => key).ToArray();
+        var unknown = translated.Keys.Except(english.Keys, StringComparer.Ordinal).OrderBy(key => key).ToArray();
+        if (missing.Length > 0 || unknown.Length > 0)
+            throw new InvalidOperationException(
+                $"Localization key mismatch in Strings.{code}.xaml. Missing: {string.Join(", ", missing)}; unknown: {string.Join(", ", unknown)}");
+
+        var declaredCode = translated.TryGetValue("Lang.Code", out var value) ? value : "";
+        if (!declaredCode.Equals(code, StringComparison.Ordinal))
+            throw new InvalidOperationException($"Strings.{code}.xaml declares Lang.Code '{declaredCode}'.");
+
+        foreach (var key in english.Keys)
+        {
+            if (!PlaceholderSet(english[key]).SetEquals(PlaceholderSet(translated[key])))
+                throw new InvalidOperationException($"Localization placeholder mismatch for '{key}' in Strings.{code}.xaml.");
+        }
     }
 
     var mainWindow = File.ReadAllText(Path.Combine(repository, "Thermalyn", "MainWindow.xaml"));
@@ -281,7 +300,7 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
                 "dotnet restore tests/Thermalyn.Tests/Thermalyn.Tests.csproj --force-evaluate");
 
         if (!relative.StartsWith("Thermalyn" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase) ||
-            relative.EndsWith("Strings.fr.xaml", StringComparison.OrdinalIgnoreCase) ||
+            IsTranslatedStringTable(file) ||
             Path.GetExtension(file) is not (".cs" or ".xaml")) continue;
 
         var frenchMatch = frenchLiteral.Match(text);
@@ -306,7 +325,8 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
     if (!File.ReadAllText(Path.Combine(repository, "CHANGELOG.md")).Contains($"## {declared} ", StringComparison.Ordinal))
         throw new InvalidOperationException($"CHANGELOG.md has no section for version {declared}.");
 
-    Console.WriteLine($"Repository contracts: {english.Count} bilingual strings, UI, installer, manifest, privacy, caption and language checks passed.");
+    Console.WriteLine($"Repository contracts: {english.Count} strings × {tables.Count} languages ({string.Join(", ", present)}), " +
+        "UI, installer, manifest, privacy, caption and language checks passed.");
 }
 
 if (args.Contains("--startup-registration", StringComparer.OrdinalIgnoreCase))
@@ -430,6 +450,14 @@ static Dictionary<string, string> ReadResourceKeys(string path)
     }
 
     return entries;
+}
+
+static bool IsTranslatedStringTable(string path)
+{
+    var name = Path.GetFileName(path);
+    return name.StartsWith("Strings.", StringComparison.OrdinalIgnoreCase) &&
+           name.EndsWith(".xaml", StringComparison.OrdinalIgnoreCase) &&
+           !name.Equals("Strings.en.xaml", StringComparison.OrdinalIgnoreCase);
 }
 
 static HashSet<string> PlaceholderSet(string value) =>
