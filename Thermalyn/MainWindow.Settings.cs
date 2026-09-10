@@ -13,9 +13,7 @@ public partial class MainWindow
     {
         _loadingSettings = true;
         RefreshSettingsUpdateStatus();
-        var language = LocalizationService.Normalize(_settings.Language);
-        EnglishRadio.IsChecked = language == LocalizationService.English;
-        FrenchRadio.IsChecked = language == LocalizationService.French;
+        SelectLanguage(LocalizationService.Normalize(_settings.Language));
         GpuFirstCheck.IsChecked = _settings.GpuFirst; DarkThemeRadio.IsChecked = _settings.Theme != "Light"; LightThemeRadio.IsChecked = _settings.Theme == "Light"; GraphsCheck.IsChecked = _settings.ShowGraphs; FansCheck.IsChecked = _settings.ShowFans;
         CpuPrimaryTemperatureRadio.IsChecked = _settings.CpuPrimaryMetric != "Load"; CpuPrimaryLoadRadio.IsChecked = _settings.CpuPrimaryMetric == "Load";
         GpuPrimaryTemperatureRadio.IsChecked = _settings.GpuPrimaryMetric != "Load"; GpuPrimaryLoadRadio.IsChecked = _settings.GpuPrimaryMetric == "Load";
@@ -29,6 +27,23 @@ public partial class MainWindow
         NormalColorText.Text = NormalizeColor(_settings.NormalTemperatureColor, "#3B9EFF"); HotColorText.Text = NormalizeColor(_settings.HotTemperatureColor, "#FFA83B"); CriticalColorText.Text = NormalizeColor(_settings.CriticalTemperatureColor, "#FF5C5C");
         _loadingSettings = false;
     }
+
+    private void SelectLanguage(string language)
+    {
+        foreach (var item in LanguageCombo.Items.OfType<ComboBoxItem>())
+        {
+            if (!string.Equals(item.Tag as string, language, StringComparison.OrdinalIgnoreCase)) continue;
+            LanguageCombo.SelectedItem = item;
+            return;
+        }
+
+        LanguageCombo.SelectedIndex = 0;
+    }
+
+    private string SelectedLanguage() =>
+        LanguageCombo.SelectedItem is ComboBoxItem item && item.Tag is string code
+            ? LocalizationService.Normalize(code)
+            : LocalizationService.Normalize(_settings.Language);
 
     private void FillThresholdCombo(ComboBox combo, IReadOnlyList<int> values, int selected)
     {
@@ -247,7 +262,7 @@ public partial class MainWindow
         _settings.TemperatureUnit = FahrenheitRadio.IsChecked == true ? "F" : "C"; _settings.StartWithWindows = StartupCheck.IsChecked == true; _settings.AlwaysOnTop = TopmostCheck.IsChecked == true;
         _settings.RefreshSeconds = int.Parse(((ComboBoxItem)RefreshCombo.SelectedItem).Tag.ToString()!); _settings.MaxDrives = DriveCountCombo.SelectedIndex + 1; Topmost = _settings.AlwaysOnTop; _timer.Interval = TimeSpan.FromSeconds(_settings.RefreshSeconds);
         try { StartupService.SetEnabled(_settings.StartWithWindows); } catch { StatusText.Text = LocalizationService.Get("Settings.StartupFailed"); }
-        _settings.Language = FrenchRadio.IsChecked == true ? LocalizationService.French : LocalizationService.English;
+        _settings.Language = SelectedLanguage();
         LocalizationService.Apply(_settings.Language);
         UpdateCaptionGlyph();
         UpdateTray();

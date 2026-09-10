@@ -5,7 +5,7 @@
 param(
     [switch]$SkipInstaller,
     [ValidatePattern('^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$')]
-    [string]$Version = '1.1.1'
+    [string]$Version = '1.2.0'
 )
 
 $ErrorActionPreference = 'Stop'

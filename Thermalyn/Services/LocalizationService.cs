@@ -9,17 +9,19 @@ public static class LocalizationService
 {
     public const string English = "en";
     public const string French = "fr";
+    public const string Spanish = "es";
+    public const string German = "de";
 
     private static ResourceDictionary? _current;
     private static IReadOnlyDictionary<string, string> _strings =
         new Dictionary<string, string>(StringComparer.Ordinal);
 
-    public static IReadOnlyList<string> Available { get; } = [English, French];
+    public static IReadOnlyList<string> Available { get; } = [English, French, Spanish, German];
 
     public static string SystemDefault =>
-        CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals(French, StringComparison.OrdinalIgnoreCase)
-            ? French
-            : English;
+        Available.FirstOrDefault(code =>
+            code.Equals(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName, StringComparison.OrdinalIgnoreCase))
+        ?? English;
 
     public static string Normalize(string? language) =>
         Available.Contains(language, StringComparer.OrdinalIgnoreCase) ? language!.ToLowerInvariant() : SystemDefault;

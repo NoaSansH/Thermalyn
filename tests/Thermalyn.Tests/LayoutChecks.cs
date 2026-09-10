@@ -43,7 +43,7 @@ internal static class LayoutChecks
         }
         var count = 0;
         foreach (var (width, height) in new[] { (320, 480), (390, 844), (560, 720), (820, 600), (1200, 820), (1920, 1080) })
-            foreach (var (language, theme) in new[] { ("fr", "Dark"), ("en", "Light") })
+            foreach (var (language, theme) in new[] { ("fr", "Dark"), ("en", "Light"), ("de", "Dark"), ("es", "Light") })
                 foreach (var page in new[] { "Mini", "Balanced", "Compact", "Detailed", "Details", "Settings" })
                 {
                     window.Width = width; window.Height = height; Pump();

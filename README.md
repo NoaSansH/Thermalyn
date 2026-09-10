@@ -10,7 +10,7 @@
 [![WPF](https://img.shields.io/badge/UI-WPF-0078D4?logo=windows&logoColor=white)](https://learn.microsoft.com/dotnet/desktop/wpf/)
 [![Windows 11](https://img.shields.io/badge/Windows-11%20x64-0078D4?logo=windows11&logoColor=white)](#install)
 [![Inno Setup](https://img.shields.io/badge/Installer-Inno%20Setup%206-2E7D32)](https://jrsoftware.org/isinfo.php)
-[![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Fran%C3%A7ais-1A5C9E)](#what-it-reports)
+[![Languages](https://img.shields.io/badge/UI-English%20%C2%B7%20Fran%C3%A7ais%20%C2%B7%20Espa%C3%B1ol%20%C2%B7%20Deutsch-1A5C9E)](#what-it-reports)
 
 Hardware monitor for Windows 11. Reads processor, graphics, memory and drive sensors, keeps a
 15-minute in-memory history, and stays readable whether the window is a narrow strip in a corner
@@ -45,8 +45,8 @@ GitHub Releases to check and download a version after explicit user confirmation
 - A history of threshold crossings: when a component went above warm or critical, for how long,
   and what peak it reached.
 
-The interface is in English and French. It follows the Windows language on first launch and can be
-changed at any time in *Settings â†’ Language*.
+The interface is in English, French, Spanish and German. It follows the Windows language on first
+launch, falling back to English, and can be changed at any time in *Settings â†’ Language*.
 
 ## Install
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 — 2026-09-10
+
+- The interface is now also available in Spanish and German. On first launch Thermalyn follows the
+  Windows language for any of the four; it falls back to English for the rest.
+- The language setting moved from a row of buttons to a list, and remembers the choice by language
+  code rather than by position.
+- The build now checks every string table against English: a missing key, an unknown one, a
+  mismatched `{0}` placeholder or a language the application offers without a table stops the build.
+- Window layouts are rendered in all four languages at every supported size, so a long translation
+  that overflows a narrow window is caught before release.
+
 ## 1.1.1 — 2026-09-09
 
 - Copy diagnostics is now always available beside Settings and confirms when the text reaches the
