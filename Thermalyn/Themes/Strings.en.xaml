@@ -264,5 +264,14 @@
     <sys:String x:Key="Session.Copied">Diagnostics copied</sys:String>
     <sys:String x:Key="Session.CopyFailed">Could not copy diagnostics: {0}</sys:String>
     <sys:String x:Key="Session.MemoryOnly">Session statistics stay in memory only and disappear when the application closes.</sys:String>
+    <sys:String x:Key="Common.Battery">Battery</sys:String>
+    <sys:String x:Key="Battery.Charging">Charging</sys:String>
+    <sys:String x:Key="Battery.Discharging">On battery</sys:String>
+    <sys:String x:Key="Battery.Health">Health</sys:String>
+    <sys:String x:Key="Battery.TimeLeft">{0} left</sys:String>
+    <sys:String x:Key="Battery.Designed">Designed capacity</sys:String>
+    <sys:String x:Key="Battery.FullCharge">Capacity when full</sys:String>
+    <sys:String x:Key="Battery.Remaining">Remaining capacity</sys:String>
+    <sys:String x:Key="Unit.WattHours">Wh</sys:String>
     <sys:String x:Key="Common.Error">Error</sys:String>
 </ResourceDictionary>

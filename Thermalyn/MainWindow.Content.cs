@@ -129,6 +129,7 @@ public partial class MainWindow
         DetailedSystemPanel.Children.Clear();
         var memory = ListRow(Glyph("IconMemory"), $"{LocalizationService.Get("Common.Ram")} {MemorySummary(_snapshot.Memory)}".TrimEnd(), _snapshot.Memory.Name, Percent(_snapshot.Memory.Load), FindBrush("TextPrimaryBrush"));
         memory.Cursor = Cursors.Hand; memory.MouseLeftButtonUp += (_, _) => ShowDetails(_snapshot.Memory); DetailedSystemPanel.Children.Add(memory);
+        foreach (var battery in _snapshot.Batteries) DetailedSystemPanel.Children.Add(BatteryRow(battery));
         foreach (var drive in _snapshot.Storage.Take(_settings.MaxDrives))
         {
             var row = ListRow(Glyph("IconHardDrive"), $"{drive.Kind} · {drive.Name}", "", Temperature(drive.Temperature), TemperatureBrush(drive.Temperature, ThermalComponent.Storage));
@@ -141,6 +142,20 @@ public partial class MainWindow
         }
         NormalizeDividers(DetailedSystemPanel);
     }
+
+    private Border BatteryRow(BatteryReading battery)
+    {
+        var meta = new List<string> { LocalizationService.Get(battery.IsCharging ? "Battery.Charging" : "Battery.Discharging") };
+        if (battery.RateWatts is > .05) meta.Add($"{battery.RateWatts:0.0} W");
+        if (battery.RemainingTime is { } left) meta.Add(LocalizationService.Format("Battery.TimeLeft", Duration(left)));
+        if (battery.HealthPercent is { } health) meta.Add($"{LocalizationService.Get("Battery.Health")} {health:0}%");
+        return ListRow(Glyph("IconBattery"), LocalizationService.Get("Common.Battery"),
+            string.Join(" · ", meta), Percent(battery.ChargePercent), FindBrush("TextPrimaryBrush"));
+    }
+
+    private static string Duration(TimeSpan value) => value.TotalHours >= 1
+        ? $"{(int)value.TotalHours} h {value.Minutes:00}"
+        : $"{(int)value.TotalMinutes} min";
 
     private void BuildDetailedSensorPanels()
     {

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0 — 2026-09-10
+
+- Battery charge, health, charge or discharge rate, voltage, capacities and the remaining-time
+  estimate are read on machines that have one. The rate is published under a different sensor name
+  depending on the direction, and the time estimate exists only while draining, so both are read
+  from the current state rather than assumed. A machine without a battery shows nothing extra.
+- Scrolling with a precision touchpad now follows the distance travelled. Windows sends a stream of
+  small movements, and each one used to scroll a full three lines, which made a two-finger swipe
+  jump. A mouse wheel is unchanged: one notch still scrolls exactly what it did before.
+
 ## 1.2.0 — 2026-09-10
 
 - The interface is now also available in Spanish and German. On first launch Thermalyn follows the

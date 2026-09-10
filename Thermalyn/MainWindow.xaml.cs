@@ -87,6 +87,7 @@ public partial class MainWindow : Window
     internal MainWindow(bool previewMode)
     {
         _previewMode = previewMode;
+        Controls.PrecisionScrolling.Enable();
         InitializeComponent();
         foreach (var grid in new[] { HeroGrid, CompactCardsGrid, DetailedChartGrid, DetailedSensorGrid })
             _cardPairs.Add((grid, grid.Children[0], grid.Children[1]));

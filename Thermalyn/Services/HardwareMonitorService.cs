@@ -20,7 +20,8 @@ public sealed class HardwareMonitorService : IDisposable
         IsMotherboardEnabled = false,
         IsControllerEnabled = false,
         IsNetworkEnabled = false,
-        IsPsuEnabled = false
+        IsPsuEnabled = false,
+        IsBatteryEnabled = false
     };
     private bool _opened;
     private int _stage;
@@ -74,6 +75,7 @@ public sealed class HardwareMonitorService : IDisposable
                     _computer.IsStorageEnabled = true;
                     _computer.IsControllerEnabled = true;
                     _computer.IsPsuEnabled = true;
+                    _computer.IsBatteryEnabled = true;
                 }
                 catch { }
                 Volatile.Write(ref _stage, 2);
@@ -168,6 +170,8 @@ public sealed class HardwareMonitorService : IDisposable
                 Memory = memory,
                 Storage = storage,
                 Fans = fans,
+                Batteries = all.Where(hardware => hardware.HardwareType == HardwareType.Battery)
+                    .Select(BuildBattery).Where(battery => battery.ChargePercent.HasValue).Take(4).ToList(),
                 LowLevelDriverInstalled = IsPawnIoInstalled()
             };
             Trace($"Read: open {openMs} ms, update {updateMs - openMs} ms, rest {watch.ElapsedMilliseconds - updateMs} ms, total {watch.ElapsedMilliseconds} ms");
@@ -182,6 +186,57 @@ public sealed class HardwareMonitorService : IDisposable
             OpenNextStage();
         }
     }
+
+    private static BatteryReading BuildBattery(IHardware hardware)
+    {
+        var samples = hardware.Sensors.Where(sensor => sensor.Value.HasValue)
+            .Select(sensor => new SensorSample(sensor.Name, sensor.SensorType, sensor.Value!.Value)).ToList();
+
+        var charging = SensorSelector.BatteryIsCharging(samples);
+        var designed = SensorSelector.BatteryCapacity(samples, "Designed Capacity")?.Value;
+        var full = SensorSelector.BatteryCapacity(samples, "Fully-Charged Capacity")?.Value;
+        var degradation = SensorSelector.BatteryLevel(samples, "Degradation Level")?.Value;
+        var seconds = SensorSelector.BatteryRemainingTime(samples)?.Value;
+
+        var battery = new BatteryReading
+        {
+            Name = hardware.Name,
+            ChargePercent = SensorSelector.BatteryLevel(samples, "Charge Level")?.Value,
+            IsCharging = charging,
+            RateWatts = SensorSelector.BatteryRate(samples, charging)?.Value,
+            Voltage = SensorSelector.BatteryVoltage(samples)?.Value,
+            DesignedWattHours = MilliwattHours(designed),
+            FullChargeWattHours = MilliwattHours(full),
+            RemainingWattHours = MilliwattHours(SensorSelector.BatteryCapacity(samples, "Remaining Capacity")?.Value),
+            RemainingTime = seconds is > 0 ? TimeSpan.FromSeconds(seconds.Value) : null
+        };
+
+        // Degradation is published directly; the capacities are the fallback for a battery that
+        // reports them without it.
+        battery.HealthPercent = degradation is >= 0 and <= 100
+            ? 100 - degradation.Value
+            : designed is > 0 && full is > 0 ? Math.Min(100, full.Value / designed.Value * 100) : null;
+
+        foreach (var sensor in samples.OrderBy(sample => sample.Type).ThenBy(sample => sample.Name))
+        {
+            var (unit, value) = FormatBattery(sensor.Type, sensor.Value);
+            if (unit.Length == 0) continue;
+            battery.Details.Add(new SensorReading(sensor.Name, sensor.Type.ToString(), value, unit));
+        }
+        return battery;
+    }
+
+    private static double? MilliwattHours(double? value) => value is > 0 ? value.Value / 1000 : null;
+
+    private static (string Unit, double Value) FormatBattery(SensorType type, double value) => type switch
+    {
+        SensorType.Level => ("%", value),
+        SensorType.Voltage => ("V", value),
+        SensorType.Current => ("A", value),
+        SensorType.Power => ("W", value),
+        SensorType.Energy => ("Wh", value / 1000),
+        _ => ("", value)
+    };
 
     private static void AttachMemoryModules(ComponentReading memory, List<IHardware> all)
     {
