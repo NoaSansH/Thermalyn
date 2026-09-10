@@ -69,12 +69,7 @@ scoop install https://raw.githubusercontent.com/NoaSansH/Thermalyn/main/packagin
 [`CHANGELOG.md`](CHANGELOG.md) lists what changed in each version.
 
 `SHA256SUMS.txt` in the same release lists the checksum of each file, so you can confirm a download
-arrived intact. Every executable also carries a signed build provenance attestation, which proves it
-came from this repository's workflow at that tag and was not touched afterwards:
-
-```powershell
-gh attestation verify Thermalyn-Setup-1.1.1.exe --repo NoaSansH/Thermalyn
-```
+arrived intact.
 
 Windows shows a reputation warning the first time, because the executable is not code-signed:
 choose **More info**, then **Run anyway**. Only a paid certificate removes that screen.
@@ -201,8 +196,9 @@ reading the ResourceDictionary live.
 
 ## Who maintains it
 
-Thermalyn is maintained by one person: [@NoaSansH](https://github.com/NoaSansH). Every change is reviewed, tested and approved by the maintainer, who publishes every release. Releases are built by GitHub Actions from a tag, never from a developer machine, and
-each binary carries a signed provenance attestation.
+Thermalyn is maintained by one person: [@NoaSansH](https://github.com/NoaSansH). Every change is
+reviewed, tested and approved by the maintainer, who publishes every release. Release downloads are
+published with SHA-256 checksums.
 
 Contributions are welcome through pull requests; see [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
