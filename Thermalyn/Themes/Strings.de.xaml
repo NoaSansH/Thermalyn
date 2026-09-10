@@ -264,5 +264,14 @@
     <sys:String x:Key="Session.Copied">Diagnose kopiert</sys:String>
     <sys:String x:Key="Session.CopyFailed">Die Diagnose konnte nicht kopiert werden: {0}</sys:String>
     <sys:String x:Key="Session.MemoryOnly">Die Sitzungsstatistik bleibt nur im Arbeitsspeicher und verschwindet, wenn die Anwendung geschlossen wird.</sys:String>
+    <sys:String x:Key="Common.Battery">Akku</sys:String>
+    <sys:String x:Key="Battery.Charging">Wird geladen</sys:String>
+    <sys:String x:Key="Battery.Discharging">Im Akkubetrieb</sys:String>
+    <sys:String x:Key="Battery.Health">Zustand</sys:String>
+    <sys:String x:Key="Battery.TimeLeft">noch {0}</sys:String>
+    <sys:String x:Key="Battery.Designed">Auslegungskapazität</sys:String>
+    <sys:String x:Key="Battery.FullCharge">Kapazität bei voller Ladung</sys:String>
+    <sys:String x:Key="Battery.Remaining">Verbleibende Kapazität</sys:String>
+    <sys:String x:Key="Unit.WattHours">Wh</sys:String>
     <sys:String x:Key="Common.Error">Fehler</sys:String>
 </ResourceDictionary>

@@ -133,6 +133,35 @@ A SMART pass costs about 30 ms, more than the processor and graphics groups toge
 temperatures that move over minutes. Groups that are not refreshed keep their last published
 values, so the display stays correct.
 
+## Battery
+
+Probed on a Lenovo 21ME000RFR (ThinkPad, Ryzen 7 PRO 8840HS), both while charging and while
+draining, with LibreHardwareMonitor 0.9.7-pre729.
+
+| Sensor | Type | Unit | Present |
+| --- | --- | --- | --- |
+| `Charge Level` | Level | % | always |
+| `Degradation Level` | Level | % | always |
+| `Voltage` | Voltage | V | always |
+| `Designed Capacity` | Energy | mWh | always |
+| `Fully-Charged Capacity` | Energy | mWh | always |
+| `Remaining Capacity` | Energy | mWh | always |
+| `Charge Rate` / `Charge Current` | Power / Current | W / A | charging only |
+| `Discharge Rate` / `Discharge Current` | Power / Current | W / A | draining only |
+| `Remaining Time (Estimated)` | TimeSpan | s | draining only |
+
+Two consequences the code has to respect. The rate is published under a different name depending on
+the direction, and only one of the two pair exists at a time, so which name to read is decided from
+the state rather than tried in order. And the remaining-time estimate disappears the moment the
+charger is plugged in: it must read as absent, not as the last value seen.
+
+Capacities are milliwatt-hours and are divided by 1000 for display. Health is `100 − Degradation
+Level`, falling back to `Fully-Charged ÷ Designed` for a battery that publishes the capacities
+without the degradation reading.
+
+A desktop publishes no battery hardware at all, and the group is opened in the third stage, so
+nothing here is on the startup path.
+
 ## Adding a sensor
 
 1. Run the probe on the target machine to see the real names:

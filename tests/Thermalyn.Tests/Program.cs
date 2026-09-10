@@ -146,6 +146,45 @@ Missing("A limit alone is not a reading", SensorSelector.ModuleTemperature(
 Missing("A DIMM suffix is not a current reading", SensorSelector.ModuleTemperature(
     [S("DIMM #0 Max", SensorType.Temperature, 80)]));
 
+var dischargingBattery = new[]
+{
+    S("Designed Capacity", SensorType.Energy, 52500), S("Fully-Charged Capacity", SensorType.Energy, 46070),
+    S("Remaining Capacity", SensorType.Energy, 6550), S("Degradation Level", SensorType.Level, 12.247),
+    S("Charge Level", SensorType.Level, 14.217), S("Voltage", SensorType.Voltage, 14.439),
+    S("Discharge Current", SensorType.Current, 0.65), S("Discharge Rate", SensorType.Power, 9.399),
+    S("Remaining Time (Estimated)", SensorType.TimeSpan, 2508)
+};
+if (SensorSelector.BatteryIsCharging(dischargingBattery))
+    throw new InvalidOperationException("A discharging battery was read as charging.");
+Equal("Discharge rate", 9.399, SensorSelector.BatteryRate(dischargingBattery, false));
+Equal("Charge level", 14.217, SensorSelector.BatteryLevel(dischargingBattery, "Charge Level"));
+Equal("Degradation level", 12.247, SensorSelector.BatteryLevel(dischargingBattery, "Degradation Level"));
+Equal("Remaining time while discharging", 2508, SensorSelector.BatteryRemainingTime(dischargingBattery));
+
+var chargingBattery = new[]
+{
+    S("Designed Capacity", SensorType.Energy, 52500), S("Fully-Charged Capacity", SensorType.Energy, 46060),
+    S("Remaining Capacity", SensorType.Energy, 33090), S("Degradation Level", SensorType.Level, 12.266),
+    S("Charge Level", SensorType.Level, 71.841), S("Voltage", SensorType.Voltage, 16.754),
+    S("Charge Current", SensorType.Current, 1.489), S("Charge Rate", SensorType.Power, 24.963)
+};
+if (!SensorSelector.BatteryIsCharging(chargingBattery))
+    throw new InvalidOperationException("A charging battery was read as discharging.");
+Equal("Charge rate", 24.963, SensorSelector.BatteryRate(chargingBattery, true));
+// The estimate is only published while draining, so it has to stay absent rather than stale.
+Missing("No remaining time while charging", SensorSelector.BatteryRemainingTime(chargingBattery));
+Missing("No discharge rate while charging", SensorSelector.BatteryRate(chargingBattery, false));
+
+// A desktop exposes no battery hardware at all, and a battery may omit any of these.
+Missing("No charge level without a battery", SensorSelector.BatteryLevel([], "Charge Level"));
+Missing("No rate without a battery", SensorSelector.BatteryRate([], false));
+Missing("No capacity without a battery", SensorSelector.BatteryCapacity([], "Designed Capacity"));
+Missing("No voltage without a battery", SensorSelector.BatteryVoltage([]));
+if (SensorSelector.BatteryIsCharging([]))
+    throw new InvalidOperationException("Absent battery sensors were read as charging.");
+Missing("A percentage over 100 is not a charge level",
+    SensorSelector.BatteryLevel([S("Charge Level", SensorType.Level, 140)], "Charge Level"));
+
 Console.WriteLine("Sensor selection checks passed.");
 
 if (args.Contains("--settings", StringComparer.OrdinalIgnoreCase))
@@ -251,7 +290,7 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
         "images", "information", "instance", "message", "messages", "minutes", "normal", "note",
         "notes", "option", "options", "page", "pages", "position", "service", "services", "table",
         "version", "principal", "transparent", "orange", "vertical", "horizontal", "standard",
-        "diagnostic", "studio"
+        "diagnostic", "studio", "charge"
     ];
     var englishWords = Vocabulary(english.Values);
     var frenchOnly = Vocabulary(french.Values)
@@ -372,7 +411,7 @@ if (args.Contains("--startup-registration", StringComparer.OrdinalIgnoreCase))
 
 if (args.Contains("--probe", StringComparer.OrdinalIgnoreCase))
 {
-    var computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true, IsMemoryEnabled = false };
+    var computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true, IsMemoryEnabled = false, IsBatteryEnabled = true };
     try
     {
         computer.Open();
@@ -380,6 +419,13 @@ if (args.Contains("--probe", StringComparer.OrdinalIgnoreCase))
         {
             hardware.Update();
             foreach (var child in hardware.SubHardware) child.Update();
+            if (hardware.HardwareType == HardwareType.Battery)
+            {
+                Console.WriteLine($"{hardware.HardwareType}: {hardware.Name}");
+                foreach (var sensor in hardware.Sensors)
+                    Console.WriteLine($"  {sensor.SensorType,-12} {sensor.Name,-28} = {sensor.Value?.ToString() ?? "null"}");
+                continue;
+            }
             if (hardware.HardwareType == HardwareType.Memory)
             {
                 Console.WriteLine($"{hardware.HardwareType}: {hardware.Name}");
@@ -418,6 +464,11 @@ if (args.Contains("--probe", StringComparer.OrdinalIgnoreCase))
             $"CPU {snapshot.Cpu.Load:0.0}% {snapshot.Cpu.Temperature:0.0} C {snapshot.Cpu.ClockMhz:0} MHz {snapshot.Cpu.PowerWatts:0.0} W; " +
             $"GPU {snapshot.Gpu.Load:0.0}% {snapshot.Gpu.Temperature:0.0} C {snapshot.Gpu.PowerWatts:0.0} W; " +
             $"RAM {snapshot.Memory.Load:0.0}%");
+        foreach (var battery in snapshot.Batteries)
+            Console.WriteLine($"  battery {battery.Name}: {battery.ChargePercent:0.0}% " +
+                $"{(battery.IsCharging ? "charging" : "draining")} {battery.RateWatts:0.0} W, " +
+                $"health {battery.HealthPercent:0.0}%, {battery.RemainingWattHours:0.0}/{battery.FullChargeWattHours:0.0} " +
+                $"of {battery.DesignedWattHours:0.0} Wh, left {battery.RemainingTime?.ToString() ?? "n/a"}");
         Thread.Sleep(300);
     }
 }

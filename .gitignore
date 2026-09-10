@@ -14,3 +14,4 @@ diagnostic.log
 # interface and does not redistribute it. Only the installer bundles a copy, fetched at build
 # time from https://pawnio.eu into this path.
 /Thermalyn/Assets/PawnIO_setup.exe
+tmp/

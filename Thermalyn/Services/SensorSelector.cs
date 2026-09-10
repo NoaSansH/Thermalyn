@@ -111,6 +111,28 @@ internal static class SensorSelector
         return Exact(values, "GPU Fan", "GPU") ?? (values.Count > 0 ? values[0] : null);
     }
 
+    // A battery publishes "Charge Rate" and "Charge Current" while it charges and the "Discharge"
+    // pair while it drains, never both, and "Remaining Time (Estimated)" disappears on charge.
+    public static SensorSample? BatteryLevel(IReadOnlyList<SensorSample> samples, string name) =>
+        Exact(Valid(samples, SensorType.Level, value => value is >= 0 and <= 100), name);
+
+    public static SensorSample? BatteryVoltage(IReadOnlyList<SensorSample> samples) =>
+        Exact(Valid(samples, SensorType.Voltage, value => value is > 0 and < 100), "Voltage");
+
+    public static SensorSample? BatteryRate(IReadOnlyList<SensorSample> samples, bool charging) =>
+        Exact(Valid(samples, SensorType.Power, value => value is >= 0 and < 500),
+            charging ? "Charge Rate" : "Discharge Rate");
+
+    public static SensorSample? BatteryCapacity(IReadOnlyList<SensorSample> samples, string name) =>
+        Exact(Valid(samples, SensorType.Energy, value => value > 0), name);
+
+    public static SensorSample? BatteryRemainingTime(IReadOnlyList<SensorSample> samples) =>
+        Exact(Valid(samples, SensorType.TimeSpan, value => value is > 0 and < 172800), "Remaining Time (Estimated)");
+
+    public static bool BatteryIsCharging(IReadOnlyList<SensorSample> samples) =>
+        Exact(Valid(samples, SensorType.Power, value => value >= 0), "Charge Rate") is not null ||
+        Exact(Valid(samples, SensorType.Current, value => value >= 0), "Charge Current") is not null;
+
     private static List<SensorSample> Valid(IEnumerable<SensorSample> samples, SensorType type, Func<double, bool> predicate) =>
         samples.Where(sample => sample.Type == type && double.IsFinite(sample.Value) && predicate(sample.Value)).ToList();
 
