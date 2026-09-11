@@ -12,12 +12,81 @@ public partial class MainWindow
     private const int DwmWindowCornerPreference = 33;
     private const int DwmCornerDoNotRound = 1;
     private const int DwmCornerRound = 2;
+    private const int WmGetMinMaxInfo = 0x0024;
+    private const int WmNcHitTest = 0x0084;
+    private const int WmNcMouseMove = 0x00A0;
+    private const int WmNcLButtonDown = 0x00A1;
+    private const int WmNcLButtonUp = 0x00A2;
+    private const int WmNcLButtonDoubleClick = 0x00A3;
+    private const int WmLButtonUp = 0x0202;
+    private const int WmNcMouseLeave = 0x02A2;
+    private const int WmCancelMode = 0x001F;
+    private const int WmCaptureChanged = 0x0215;
+    private const int HtCaption = 2;
+    private const int HtMaxButton = 9;
+    private const uint TmeLeave = 0x00000002;
+    private const uint TmeNonClient = 0x00000010;
+    private const uint MonitorDefaultToNearest = 0x00000002;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
     [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromWindow(IntPtr window, uint flags);
+
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+
+    [DllImport("user32.dll")]
     private static extern bool TrackMouseEvent(ref TrackMouseEventData eventTrack);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SetCapture(IntPtr hwnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ReleaseCapture();
+
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorPos(ref NativePoint point);
+
+    // A caption gesture owns its release; resize only after that release is consumed.
+    private bool _captionGesturePending;
+    private bool _captionDoubleClick;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativePoint
+    {
+        public int X;
+        public int Y;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct NativeRect
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MinMaxInfo
+    {
+        public NativePoint Reserved;
+        public NativePoint MaxSize;
+        public NativePoint MaxPosition;
+        public NativePoint MinTrackSize;
+        public NativePoint MaxTrackSize;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct MonitorInfo
+    {
+        public uint Size;
+        public NativeRect Monitor;
+        public NativeRect Work;
+        public uint Flags;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct TrackMouseEventData
@@ -38,12 +107,41 @@ public partial class MainWindow
 
     private IntPtr WindowMessageHook(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (message == WmNcHitTest)
+        if (message is WmCancelMode or WmCaptureChanged)
         {
-            var point = new Point(unchecked((short)(lParam.ToInt64() & 0xFFFF)), unchecked((short)((lParam.ToInt64() >> 16) & 0xFFFF)));
+            _captionGesturePending = false;
+            _captionDoubleClick = false;
+        }
+        else if (_captionGesturePending && message is WmLButtonUp or WmNcLButtonUp)
+        {
+            var cursor = new NativePoint();
+            var toggle = _captionDoubleClick ||
+                (GetCursorPos(ref cursor) && IsPointInside(MaximizeCaptionButton, new Point(cursor.X, cursor.Y)));
+            _captionGesturePending = false;
+            _captionDoubleClick = false;
+            handled = true;
+            _ = ReleaseCapture();
+            SetMaximizeHover(false);
+            if (toggle) ToggleMaximize();
+        }
+        else if (message == WmGetMinMaxInfo)
+        {
+            ApplyMaximizedWorkArea(hwnd, lParam);
+            handled = true;
+        }
+        else if (message == WmNcHitTest)
+        {
+            var point = new Point(
+                unchecked((short)(lParam.ToInt64() & 0xFFFF)),
+                unchecked((short)((lParam.ToInt64() >> 16) & 0xFFFF)));
             var overMaximize = IsPointInside(MaximizeCaptionButton, point);
             SetMaximizeHover(overMaximize);
-            if (overMaximize) { BeginNonClientMouseTracking(hwnd); handled = true; return new IntPtr(HtMaxButton); }
+            if (overMaximize)
+            {
+                BeginNonClientMouseTracking(hwnd);
+                handled = true;
+                return new IntPtr(HtMaxButton);
+            }
         }
         else if (message == WmNcMouseMove)
         {
@@ -51,24 +149,37 @@ public partial class MainWindow
             SetMaximizeHover(overMaximize);
             if (overMaximize) BeginNonClientMouseTracking(hwnd);
         }
-        else if (message == WmNcMouseLeave) SetMaximizeHover(false);
-        else if (message == WmNcLButtonUp && wParam.ToInt32() == HtMaxButton)
+        else if (message == WmNcMouseLeave)
         {
-            SetMaximizeHover(false); ToggleMaximize(); handled = true;
+            SetMaximizeHover(false);
+        }
+        else if ((message is WmNcLButtonDown or WmNcLButtonDoubleClick && wParam.ToInt32() == HtMaxButton) ||
+                 (message == WmNcLButtonDoubleClick && wParam.ToInt32() == HtCaption))
+        {
+            _captionDoubleClick = wParam.ToInt32() == HtCaption;
+            _captionGesturePending = true;
+            _ = SetCapture(hwnd);
+            handled = true;
         }
         return IntPtr.Zero;
     }
 
-    private static bool IsPointInside(FrameworkElement element, Point point)
+    private static bool IsPointInside(FrameworkElement element, Point screenPoint)
     {
-        if (!element.IsVisible || element.ActualWidth <= 0) return false;
-        var origin = element.PointToScreen(new Point());
-        return new Rect(origin, new Size(element.ActualWidth, element.ActualHeight)).Contains(point);
+        if (!element.IsVisible || element.ActualWidth <= 0 || element.ActualHeight <= 0) return false;
+        var topLeft = element.PointToScreen(new Point(0, 0));
+        var bottomRight = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
+        return new Rect(topLeft, bottomRight).Contains(screenPoint);
     }
 
     private static void BeginNonClientMouseTracking(IntPtr hwnd)
     {
-        var tracking = new TrackMouseEventData { Size = (uint)Marshal.SizeOf<TrackMouseEventData>(), Flags = TmeLeave | TmeNonClient, Window = hwnd };
+        var tracking = new TrackMouseEventData
+        {
+            Size = (uint)Marshal.SizeOf<TrackMouseEventData>(),
+            Flags = TmeLeave | TmeNonClient,
+            Window = hwnd
+        };
         _ = TrackMouseEvent(ref tracking);
     }
 
@@ -86,14 +197,35 @@ public partial class MainWindow
         }
     }
 
+    private static void ApplyMaximizedWorkArea(IntPtr hwnd, IntPtr lParam)
+    {
+        var monitor = MonitorFromWindow(hwnd, MonitorDefaultToNearest);
+        if (monitor == IntPtr.Zero) return;
+
+        var monitorInfo = new MonitorInfo { Size = (uint)Marshal.SizeOf<MonitorInfo>() };
+        if (!GetMonitorInfo(monitor, ref monitorInfo)) return;
+
+        var minMax = Marshal.PtrToStructure<MinMaxInfo>(lParam);
+        minMax.MaxPosition.X = Math.Abs(monitorInfo.Work.Left - monitorInfo.Monitor.Left);
+        minMax.MaxPosition.Y = Math.Abs(monitorInfo.Work.Top - monitorInfo.Monitor.Top);
+        minMax.MaxSize.X = Math.Abs(monitorInfo.Work.Right - monitorInfo.Work.Left);
+        minMax.MaxSize.Y = Math.Abs(monitorInfo.Work.Bottom - monitorInfo.Work.Top);
+        Marshal.StructureToPtr(minMax, lParam, false);
+    }
+
     private void MinimizeWindow_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
     private void MaximizeWindow_Click(object sender, RoutedEventArgs e) => ToggleMaximize();
     private void CloseWindow_Click(object sender, RoutedEventArgs e) => Close();
 
+    private void OnWindowStateChanged(object? sender, EventArgs e)
+    {
+        UpdateCaptionGlyph();
+        MinimizeToNotificationArea();
+    }
+
     private void ToggleMaximize()
     {
-        if (WindowState == WindowState.Maximized) SystemCommands.RestoreWindow(this);
-        else SystemCommands.MaximizeWindow(this);
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     }
 
     private void UpdateCaptionGlyph()

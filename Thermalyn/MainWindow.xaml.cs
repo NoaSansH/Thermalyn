@@ -72,14 +72,6 @@ public partial class MainWindow : Window
     private static readonly int[] HotThresholds = Enumerable.Range(8, 13).Select(i => i * 5).ToArray();
     private static readonly int[] CriticalThresholds = Enumerable.Range(9, 14).Select(i => i * 5).ToArray();
 
-    private const int WmNcHitTest = 0x0084;
-    private const int WmNcMouseMove = 0x00A0;
-    private const int WmNcLButtonUp = 0x00A2;
-    private const int WmNcMouseLeave = 0x02A2;
-    private const int HtMaxButton = 9;
-    private const uint TmeLeave = 0x00000002;
-    private const uint TmeNonClient = 0x00000010;
-
     private readonly bool _previewMode;
 
     public MainWindow() : this(false) { }
@@ -97,7 +89,7 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         if (!previewMode) { Loaded += OnLoaded; Closed += OnClosed; }
         SourceInitialized += OnSourceInitialized;
-        StateChanged += (_, _) => { UpdateCaptionGlyph(); MinimizeToNotificationArea(); };
+        StateChanged += OnWindowStateChanged;
         SizeChanged += (_, _) => ApplyResponsiveLayout();
         StartLoadingAnimation();
         HotThresholdCombo.SelectionChanged += (_, _) => ValidateThresholds();

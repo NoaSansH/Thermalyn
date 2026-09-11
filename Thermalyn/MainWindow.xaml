@@ -36,7 +36,7 @@
                         </Grid>
                     </Button>
                     <Button x:Name="MinimizeCaptionButton" Style="{StaticResource CaptionButton}" Click="MinimizeWindow_Click"><Border Width="10" Height="1" Background="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}"/></Button>
-                    <Button x:Name="MaximizeCaptionButton" Style="{StaticResource CaptionButton}" Click="MaximizeWindow_Click"><Grid Width="10" Height="10"><Border x:Name="MaximizeGlyph" BorderBrush="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" BorderThickness="1" CornerRadius="1"/><Path x:Name="RestoreGlyph" Visibility="Collapsed" Data="M3,1 H10 V8 M1,3 H8 V10 H1 Z" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1"/></Grid></Button>
+                    <Button x:Name="MaximizeCaptionButton" Style="{StaticResource CaptionButton}" Click="MaximizeWindow_Click"><Grid Width="10" Height="10"><Path x:Name="MaximizeGlyph" Data="M1,1 H9 V9 H1 Z" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1"/><Path x:Name="RestoreGlyph" Visibility="Collapsed" Data="M3,1 H9 V7 M1,3 H7 V9 H1 Z" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1"/></Grid></Button>
                     <Button x:Name="CloseCaptionButton" Style="{StaticResource CloseCaptionButton}" Click="CloseWindow_Click"><controls:Icon Data="{StaticResource IconX}" Width="18" Height="18" Stroke="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.1"/></Button>
                 </StackPanel>
             </Grid>

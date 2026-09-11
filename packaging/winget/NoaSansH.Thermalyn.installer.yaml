@@ -9,6 +9,9 @@ InstallModes:
 InstallerSwitches:
   Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
   SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: Microsoft.DotNet.DesktopRuntime.8
 UpgradeBehavior: install
 ProductCode: '{8F2C1D74-4E63-4A18-9E2B-5C7A0D3F1B96}_is1'
 ReleaseDate: 2026-09-09

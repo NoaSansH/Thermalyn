@@ -71,6 +71,20 @@ internal static class LayoutChecks
                         scroll.ScrollToBottom(); Pump();
                         Save(window, Path.Combine(output, name + "-bottom.png"));
                     }
+                    else if (page == "Detailed")
+                    {
+                        Save(window, Path.Combine(output, name + ".png"));
+                        var scroll = (ScrollViewer)window.FindName("DetailedView");
+                        scroll.ScrollToEnd(); Pump(); window.UpdateLayout();
+                        if (Math.Abs(scroll.VerticalOffset - scroll.ScrollableHeight) > 1)
+                            throw new InvalidOperationException($"{name}: detailed view did not reach its bottom.");
+                        var content = (FrameworkElement)scroll.Content;
+                        var bottom = content.TranslatePoint(new Point(0, content.ActualHeight), scroll).Y;
+                        if (bottom > scroll.ActualHeight + 1)
+                            throw new InvalidOperationException($"{name}: detailed content is clipped below the viewport.");
+                        Save(window, Path.Combine(output, name + "-bottom.png"));
+                        scroll.ScrollToHome(); Pump();
+                    }
                     else Save(window, Path.Combine(output, name + ".png"));
                     count++;
                 }
