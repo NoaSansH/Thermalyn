@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Thermalyn Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 using System.Windows;
 using System.Windows.Controls;
 using Thermalyn.Models;

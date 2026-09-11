@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.1 — 2026-09-11
+
+- Settings now states that Thermalyn is free software under the GNU General Public License v3.0 and
+  carries no warranty, with a link to the source code for the running version. The notice is
+  translated into the four interface languages.
+- Every source file carries an SPDX copyright and licence notice, so the terms travel with a file
+  that is read or copied outside the repository.
+
 ## 1.3.0 — 2026-09-11
 
 - Battery charge, health, charge or discharge rate, voltage, capacities and the remaining-time

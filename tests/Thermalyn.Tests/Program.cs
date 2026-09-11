@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Thermalyn Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 using LibreHardwareMonitor.Hardware;
 using System.IO;
 using System.Diagnostics;

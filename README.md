@@ -3,6 +3,7 @@
 [![CI](https://github.com/NoaSansH/Thermalyn/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/NoaSansH/Thermalyn/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/NoaSansH/Thermalyn?sort=semver&cacheSeconds=600)](https://github.com/NoaSansH/Thermalyn/releases/latest)
 [![Download](https://img.shields.io/badge/download-latest-0078D4?logo=github)](https://github.com/NoaSansH/Thermalyn/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/NoaSansH/Thermalyn/total?label=downloads&cacheSeconds=1800)](https://github.com/NoaSansH/Thermalyn/releases)
 [![Licence](https://img.shields.io/github/license/NoaSansH/Thermalyn?label=licence&color=2E7D32&cacheSeconds=600)](LICENSE)
 
 [![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)

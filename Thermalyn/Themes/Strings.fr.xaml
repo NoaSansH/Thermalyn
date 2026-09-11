@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Thermalyn Project -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:sys="clr-namespace:System;assembly=mscorlib">
@@ -148,6 +150,8 @@
     <sys:String x:Key="Settings.AlwaysOnTop">Toujours au premier plan</sys:String>
     <sys:String x:Key="Settings.TrackProcesses">Analyser l’activité des applications</sys:String>
     <sys:String x:Key="Settings.VendorNote">Certains constructeurs ne publient pas les températures ou la vitesse de leurs ventilateurs.</sys:String>
+    <sys:String x:Key="Settings.License">Logiciel libre sous licence publique générale GNU v3.0, sans aucune garantie. Le code source complet de cette version est public.</sys:String>
+    <sys:String x:Key="Settings.SourceCode">Code source et licence</sys:String>
     <sys:String x:Key="Settings.Save">Enregistrer</sys:String>
     <sys:String x:Key="Settings.StartupFailed">Le démarrage Windows n’a pas pu être modifié</sys:String>
     <sys:String x:Key="Settings.PurgeBody">Efface les réglages enregistrés, retire Thermalyn du démarrage de Windows et propose de désinstaller le pilote PawnIO. L’application se ferme ensuite ; le fichier Thermalyn.exe reste à supprimer à la main.</sys:String>

@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Thermalyn Project -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Geometry x:Key="IconThermometer">M14,14.76 V5 A4,4 0 0 0 6,5 V14.76 A6,6 0 1 0 14,14.76 M10,9 V17</Geometry>
     <Geometry x:Key="IconGauge">M20.4,15 A9,9 0 1 0 3.6,15 M12,12 L16,8 M6.7,17.3 H17.3</Geometry>

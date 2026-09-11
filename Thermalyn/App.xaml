@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2026 Thermalyn Project -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <Application x:Class="Thermalyn.App" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:controls="clr-namespace:Thermalyn.Controls">
     <Application.Resources>
         <ResourceDictionary>

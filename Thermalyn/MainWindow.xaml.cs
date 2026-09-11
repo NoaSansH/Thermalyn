@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Thermalyn Project
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -545,6 +548,14 @@ public partial class MainWindow : Window
     }
 
     private const string PawnIoDownloadPage = "https://pawnio.eu";
+
+    private const string SourceRepository = "https://github.com/NoaSansH/Thermalyn";
+
+    private void SourceCode_Click(object sender, RoutedEventArgs e)
+    {
+        try { Process.Start(new ProcessStartInfo(SourceRepository) { UseShellExecute = true }); }
+        catch (Exception) { }
+    }
 
     private void InstallHardwareDriver_Click(object sender, RoutedEventArgs e)
     {
