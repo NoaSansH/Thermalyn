@@ -19,6 +19,8 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
   NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
   CI: true
+  # The secrets context cannot be read from a step's if, so the token is surfaced as an env value.
+  WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
 
 jobs:
   release:
@@ -153,8 +155,8 @@ jobs:
       - name: Submit the WinGet manifest
         # Inert until WINGET_TOKEN holds a token that can push to the winget-pkgs fork; the token a
         # workflow gets by default only reaches this repository.
-        if: ${{ secrets.WINGET_TOKEN != '' }}
+        if: ${{ env.WINGET_TOKEN != '' }}
         shell: pwsh
         env:
-          GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+          GH_TOKEN: ${{ env.WINGET_TOKEN }}
         run: ./tools/submit-winget.ps1 -Version '${{ steps.version.outputs.version }}'
