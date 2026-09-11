@@ -138,3 +138,23 @@ jobs:
           --verify-tag
           --notes-file release-notes.md
           --title 'Thermalyn ${{ steps.version.outputs.version }}'
+      - name: Point the package manifests at the release
+        shell: pwsh
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+          ./tools/update-manifests.ps1 -Version '${{ steps.version.outputs.version }}' -ChecksumFile artifacts/release/SHA256SUMS.txt
+          if (-not (git status --porcelain packaging)) { Write-Host 'Manifests already describe this release.'; exit 0 }
+          git config user.name 'Thermalyn Project'
+          git config user.email 'noreply@thermalyn.local'
+          git add packaging
+          git commit -m 'Point the package manifests at ${{ steps.version.outputs.version }}' -m 'Versioned asset URLs and the checksums from the published SHA256SUMS.txt.'
+          git push origin main
+      - name: Submit the WinGet manifest
+        # Inert until WINGET_TOKEN holds a token that can push to the winget-pkgs fork; the token a
+        # workflow gets by default only reaches this repository.
+        if: ${{ secrets.WINGET_TOKEN != '' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.WINGET_TOKEN }}
+        run: ./tools/submit-winget.ps1 -Version '${{ steps.version.outputs.version }}'
