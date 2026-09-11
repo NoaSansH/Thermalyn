@@ -51,3 +51,16 @@ jobs:
         run: dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --settings --repository-contracts
       - name: Windows Startup Apps registration contract
         run: dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --startup-registration
+      - name: Window layouts at every size, language and theme
+        env:
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: dotnet run --project tests/Thermalyn.Tests -c Release --no-build -- --layout
+      - name: Keep the rendered layouts when they fail
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: layouts
+          path: ${{ runner.temp }}/Thermalyn-layout
+          if-no-files-found: ignore
+          retention-days: 7

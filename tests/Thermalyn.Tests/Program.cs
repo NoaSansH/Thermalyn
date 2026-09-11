@@ -364,8 +364,56 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
     if (!File.ReadAllText(Path.Combine(repository, "CHANGELOG.md")).Contains($"## {declared} ", StringComparison.Ordinal))
         throw new InvalidOperationException($"CHANGELOG.md has no section for version {declared}.");
 
+    // The package manifests describe a published release, so they trail <Version> while the next one
+    // is being written. They still have to agree with each other: a half-updated set sends people to
+    // one version's URL with another version's checksum.
+    var packaging = Path.Combine(repository, "packaging");
+    var scoop = File.ReadAllText(Path.Combine(packaging, "scoop", "thermalyn.json"));
+    var scoopVersion = Regex.Match(scoop, @"""version""\s*:\s*""([^""]+)""").Groups[1].Value;
+    var wingetNames = new[]
+    {
+        "NoaSansH.Thermalyn.yaml", "NoaSansH.Thermalyn.installer.yaml", "NoaSansH.Thermalyn.locale.en-US.yaml"
+    };
+    var packaged = "";
+    foreach (var name in wingetNames)
+    {
+        var text = File.ReadAllText(Path.Combine(packaging, "winget", name));
+        var version = Regex.Match(text, @"(?m)^PackageVersion:\s*(\S+)\s*$").Groups[1].Value;
+        if (version.Length == 0) throw new InvalidOperationException($"{name} declares no PackageVersion.");
+        if (packaged.Length == 0) packaged = version;
+        else if (!version.Equals(packaged, StringComparison.Ordinal))
+            throw new InvalidOperationException($"{name} is at {version} while another WinGet manifest is at {packaged}.");
+    }
+    if (!scoopVersion.Equals(packaged, StringComparison.Ordinal))
+        throw new InvalidOperationException($"The Scoop manifest is at {scoopVersion} and the WinGet manifests at {packaged}.");
+
+    foreach (var (relativeManifest, expected) in new[]
+    {
+        (Path.Combine("scoop", "thermalyn.json"), $"/releases/download/v{packaged}/Thermalyn-Portable-{packaged}.exe"),
+        (Path.Combine("winget", "NoaSansH.Thermalyn.installer.yaml"), $"/releases/download/v{packaged}/Thermalyn-Setup-{packaged}.exe"),
+        (Path.Combine("winget", "NoaSansH.Thermalyn.locale.en-US.yaml"), $"/releases/tag/v{packaged}")
+    })
+    {
+        if (!File.ReadAllText(Path.Combine(packaging, relativeManifest)).Contains(expected, StringComparison.Ordinal))
+            throw new InvalidOperationException($"packaging/{relativeManifest} does not point at {expected}.");
+    }
+
+    if (!File.ReadAllText(Path.Combine(repository, "CHANGELOG.md")).Contains($"## {packaged} ", StringComparison.Ordinal))
+        throw new InvalidOperationException($"CHANGELOG.md has no section for the packaged version {packaged}.");
+
+    var wingetInstaller = File.ReadAllText(Path.Combine(packaging, "winget", "NoaSansH.Thermalyn.installer.yaml"));
+
+    // Without this dependency an unattended WinGet install leaves a machine with no runtime, which is
+    // what the package submission failed on.
+    if (!wingetInstaller.Contains("PackageIdentifier: Microsoft.DotNet.DesktopRuntime.8", StringComparison.Ordinal))
+        throw new InvalidOperationException("The WinGet installer manifest no longer declares the .NET desktop runtime dependency.");
+    if (!Regex.IsMatch(wingetInstaller, @"(?m)^\s*InstallerSha256:\s*[0-9A-F]{64}\s*$"))
+        throw new InvalidOperationException("The WinGet installer manifest needs an uppercase 64-character InstallerSha256.");
+    if (!Regex.IsMatch(scoop, @"""hash""\s*:\s*""[0-9a-f]{64}"""))
+        throw new InvalidOperationException("The Scoop manifest needs a lowercase 64-character hash.");
+
     Console.WriteLine($"Repository contracts: {english.Count} strings × {tables.Count} languages ({string.Join(", ", present)}), " +
-        "UI, installer, manifest, privacy, caption and language checks passed.");
+        $"UI, installer, privacy, caption, language and {packaged} packaging checks passed.");
 }
 
 if (args.Contains("--startup-registration", StringComparer.OrdinalIgnoreCase))
