@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.0 — 2026-09-10
+## 1.3.0 — 2026-09-11
 
 - Battery charge, health, charge or discharge rate, voltage, capacities and the remaining-time
   estimate are read on machines that have one. The rate is published under a different sensor name
@@ -9,6 +9,17 @@
 - Scrolling with a precision touchpad now follows the distance travelled. Windows sends a stream of
   small movements, and each one used to scroll a full three lines, which made a two-finger swipe
   jump. A mouse wheel is unchanged: one notch still scrolls exactly what it did before.
+- The maximize and restore button works again, and holding the pointer over it opens the Windows 11
+  snap layouts flyout. Double-clicking an empty part of the title bar toggles the window the same way.
+- The click that maximizes or restores the window no longer falls through to whatever the pointer
+  lands on once the window has been resized, so a graphics card no longer gets selected by accident.
+- A maximized window now stays inside the work area instead of extending underneath the taskbar.
+- The title bar borders and glyphs are no longer clipped at any window size, and the restore glyph
+  sits fully inside its box.
+- The detailed view scrolls all the way down to its last row. The layout checks assert it for every
+  window size, language and theme rather than only rendering the page.
+- The WinGet installer manifest declares the .NET 8 desktop runtime as a dependency, so installing
+  through WinGet pulls it in instead of leaving the application unable to start.
 
 ## 1.2.0 — 2026-09-10
 
