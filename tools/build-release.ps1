@@ -4,12 +4,17 @@
 [CmdletBinding()]
 param(
     [switch]$SkipInstaller,
-    [ValidatePattern('^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$')]
-    [string]$Version = '1.3.0'
+    [ValidatePattern('^$|^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$')]
+    [string]$Version
 )
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
+if (-not $Version) {
+    # A hardcoded default goes stale the moment the project moves on.
+    $Version = [regex]::Match((Get-Content (Join-Path $root 'Thermalyn\Thermalyn.csproj') -Raw), '<Version>([^<]+)</Version>').Groups[1].Value
+    if (-not $Version) { throw 'Thermalyn.csproj declares no <Version>.' }
+}
 $project = Join-Path $root 'Thermalyn\Thermalyn.csproj'
 $artifacts = Join-Path $root 'artifacts'
 $output = Join-Path $artifacts 'release'
