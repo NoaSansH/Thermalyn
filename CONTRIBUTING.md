@@ -18,25 +18,33 @@ for the reason set out in [`NOTICE.md`](NOTICE.md).
 ```powershell
 dotnet build .\Thermalyn\Thermalyn.csproj
 dotnet run --project .\tests\Thermalyn.Tests -- --settings --repository-contracts
+dotnet run --project .\tests\Thermalyn.Tests -- --layout
 ```
 
-That second command covers sensor selection, the settings schema, key and placeholder parity
-between the two string tables, absolute user paths in tracked files, and wording written straight
-into the code instead of the string tables.
+The second command covers sensor selection, the settings schema, key and placeholder parity across
+the four string tables, absolute user paths in tracked files, wording written straight into the
+code instead of the string tables, and agreement between the Scoop and WinGet manifests.
+
+The third renders every page at six window sizes in four languages and both themes, and fails on a
+view that cannot be scrolled to its end or whose content is clipped. It is slower than the others
+and it is a CI gate, so run it before pushing anything that touches layout.
 
 ## House rules
 
 Sensors are matched by exact name. If the name isn't recognised, return nothing. There is no
 nearest-match fallback and there shouldn't be one — see [`docs/sensors.md`](docs/sensors.md).
 
-User-visible strings go in `Themes/Strings.en.xaml` and `Strings.fr.xaml`, both files, same keys.
-A string written straight into the code shows up untranslated in the other language. The checks
-reject it.
+User-visible strings go in `Themes/Strings.en.xaml` and its `fr`, `es` and `de` counterparts, all
+four files, same keys. A string written straight into the code shows up untranslated in the other
+three languages. The checks reject it.
 
 Readings run on worker threads, the UI updates on the dispatcher. `LocalizationService` snapshots
 its table for that reason: a `ResourceDictionary` is not safe to read concurrently.
 
 Comments should say why something is done. Restating the line below them is noise.
+
+Every source file opens with the two SPDX lines naming the copyright holder and GPL-3.0-or-later.
+A new file should carry them too, so its terms survive being read outside the repository.
 
 Keep an eye on the refresh cost. The app idles around 0.3% CPU. Anything you add to that path runs
 once a second on other people's machines, so if it's expensive and slow-moving give it its own
