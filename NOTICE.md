@@ -49,7 +49,7 @@ portable executable, unmodified.
 Apache-2.0 is compatible with GPL version 3, and only with version 3. That compatibility is the
 reason Thermalyn is licensed under GPL-3.0 rather than GPL-2.0.
 
-## BlackSharp.Core, DiskInfoToolkit and RAMSPDToolkit
+## BlackSharp.Core, DiskInfoToolkit and RAMSPDToolkit-NDD
 
 Mozilla Public License 2.0. Companion libraries of LibreHardwareMonitor, shipped unmodified inside
 the portable executable. Their sources are linked from the LibreHardwareMonitor repository above,
@@ -61,6 +61,21 @@ MIT licence. Downloaded by the online installer, bundled by the offline one, in 
 unmodified redistributable published by Microsoft.
 
 - Source and terms: https://github.com/dotnet/runtime
+
+Seven further assemblies from that same project are shipped beside the application rather than
+taken from the installed runtime: `System.CodeDom`, `System.Configuration.ConfigurationManager`,
+`System.Diagnostics.EventLog`, `System.Diagnostics.PerformanceCounter`, `System.IO.Ports`,
+`System.Management` and `System.Threading.AccessControl`. They are unmodified and carry the same
+MIT licence.
+
+## Mono.Posix
+
+MIT licence, from the Mono project. Pulled in by LibreHardwareMonitor for its Unix code paths and
+shipped unmodified as `Mono.Posix.NETStandard.dll`, `MonoPosixHelper.dll` and
+`libMonoPosixHelper.dll`. Nothing on Windows calls into it, but it is redistributed all the same,
+so it is named here.
+
+- Source: https://github.com/mono/mono
 
 ## Where to get the source
 

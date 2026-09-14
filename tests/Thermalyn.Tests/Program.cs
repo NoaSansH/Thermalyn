@@ -415,8 +415,33 @@ if (args.Contains("--repository-contracts", StringComparer.OrdinalIgnoreCase))
     if (!Regex.IsMatch(scoop, @"""hash""\s*:\s*""[0-9a-f]{64}"""))
         throw new InvalidOperationException("The Scoop manifest needs a lowercase 64-character hash.");
 
+    // Every library that ships beside the application has to be named in NOTICE.md, or the duty to
+    // credit what is redistributed is quietly broken by the next dependency that arrives.
+    var output = Path.Combine(repository, "Thermalyn", "bin");
+    var credited = 0;
+    if (Directory.Exists(output))
+    {
+        var notice = File.ReadAllText(Path.Combine(repository, "NOTICE.md"));
+        foreach (var name in Directory.EnumerateFiles(output, "*.dll", SearchOption.AllDirectories)
+            .Select(Path.GetFileNameWithoutExtension)
+            .OfType<string>()
+            // A satellite carries one library's translations, not a separate work.
+            .Select(name => name.EndsWith(".resources", StringComparison.OrdinalIgnoreCase) ? name[..^10] : name)
+            .Where(name => !name.Equals("Thermalyn", StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase))
+        {
+            // A package whose name only adds Lib is credited under the project's own name.
+            if (!notice.Contains(name, StringComparison.OrdinalIgnoreCase) &&
+                !(name.EndsWith("Lib", StringComparison.Ordinal) &&
+                  notice.Contains(name[..^3], StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidOperationException($"{name}.dll ships with Thermalyn but NOTICE.md does not name it.");
+            credited++;
+        }
+    }
+
     Console.WriteLine($"Repository contracts: {english.Count} strings × {tables.Count} languages ({string.Join(", ", present)}), " +
-        $"UI, installer, privacy, caption, language and {packaged} packaging checks passed.");
+        $"UI, installer, privacy, caption, language, {credited} credited libraries and {packaged} packaging checks passed.");
 }
 
 if (args.Contains("--startup-registration", StringComparer.OrdinalIgnoreCase))
